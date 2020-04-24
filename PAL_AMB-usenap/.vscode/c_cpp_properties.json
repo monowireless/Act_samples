@@ -15,7 +15,8 @@
             ],
             "browse": {
                 "path": [
-                    "${workspaceFolder}"
+                    "${workspaceFolder}",
+                    "${default}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""

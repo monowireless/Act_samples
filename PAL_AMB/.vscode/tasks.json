@@ -13,7 +13,7 @@
                 ],
                 "options": {
                     "env": {
-                        "PATH": "${env:MWSDK_ROOT}\\Tools\\MinGW\\msys\\1.0\\bin"
+                        "PATH": "..\\..\\..\\Tools\\MinGW\\msys\\1.0\\bin"
                     }
                 }
             },
@@ -50,7 +50,7 @@
                 ],
                 "options": {
                     "env": {
-                        "PATH": "${env:MWSDK_ROOT}\\Tools\\MinGW\\msys\\1.0\\bin"
+                        "PATH": "..\\..\\..\\Tools\\MinGW\\msys\\1.0\\bin"
                     }
                 }
             },
@@ -94,21 +94,23 @@
                 ],
                 "options": {
                     "env": {
-                        "PATH": "${env:MWSDK_ROOT}\\Tools\\MinGW\\msys\\1.0\\bin"
+                        "PATH": "..\\..\\..\\Tools\\MinGW\\msys\\1.0\\bin"
                     }
                 }
             },
             "linux": {
-                "command": "make",
+                "command": "sh",
                 "args": [
-                    "-l", "-c", "TWELITE=RED",
+                    "-l", "-c", "make",
+                    "TWELITE=RED",
                     ""
                 ]
             },
             "osx": {
-                "command": "make",
+                "command": "sh",
                 "args": [
-                    "-l", "-c", "TWELITE=RED",
+                    "-l", "-c", "make",
+                    "TWELITE=RED",
                     ""
                 ]
             },

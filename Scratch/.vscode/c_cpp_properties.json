@@ -48,14 +48,6 @@
             },
             "cStandard": "c99",
             "cppStandard": "c++11"
-        },
-        {
-            "name": "Win32",
-            "includePath": [
-                "C:\\Users\\--\\AppData\\Local\\Arduino15\\packages\\esp8266\\tools\\**",
-                "C:\\Users\\--\\AppData\\Local\\Arduino15\\packages\\esp8266\\hardware\\esp8266\\2.6.3\\**"
-            ],
-            "forcedInclude": []
         }
     ],
     "version": 4
