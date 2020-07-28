@@ -87,6 +87,9 @@ void loop() {
 					loop_more = true;
 				} else {
 					Serial << int(millis()) << "!FATAL: tx request failed." << crlf;
+
+					eState = E_STATE::EXIT_FATAL;
+					loop_more = true;
 				}
 				break;
 
