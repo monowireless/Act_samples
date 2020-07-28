@@ -3,3 +3,4 @@
 *.bin
 *.o
 objs*/
+builderr.log
