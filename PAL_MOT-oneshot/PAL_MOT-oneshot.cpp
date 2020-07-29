@@ -10,14 +10,26 @@ const uint32_t APP_ID = 0x1234abcd;
 // channel
 const uint8_t CHANNEL = 13;
 
+/*** state machine */
+enum class E_STATE {
+	INIT = 0,
+	START_CAPTURE,
+	WAIT_CAPTURE,
+	REQUEST_TX,
+	WAIT_TX,
+	EXIT_NORMAL,
+	EXIT_FATAL
+} eState;
+
 /*** function prototype */
 void sleepNow();
+MWX_APIRET TxReq();
 
 /*** application use */
 const uint8_t FOURCHARS[] = "PMT2";
-
-bool b_transmit; // transmit request has been issued or not.
-uint16_t txid; // transmit packet ID.
+uint32_t u32tick_capture; // tick when sensor capture started.
+uint32_t u32tick_tx; // tick when tx req has been placed.
+MWX_APIRET txid; // transmit request has been issued or not.
 const uint8_t MAX_SAMP_IN_PKT = 15; // max samples count in one packet.
 
 /*** setup procedure (run once at cold boot) */
@@ -41,7 +53,7 @@ void setup() {
 	the_twelite.begin(); // start twelite!
 
 	/*** INIT message */
-	Serial << "--- PAL_MOT(OneShot):" << FOURCHARS << " ---" << mwx::crlf;
+	Serial << crlf << "--- PAL_MOT(OneShot):" << FOURCHARS << " ---" << crlf;
 }
 
 /*** the first call after finishing setup() */
@@ -52,95 +64,137 @@ void begin() {
 
 /*** when waking up */
 void wakeup() {
-	Serial << mwx::crlf << "--- PAL_MOT(OneShot):" << FOURCHARS << " wake up ---" << mwx::crlf;
-	auto&& brd = the_twelite.board.use<PAL_MOT>();
-
-	brd.sns_MC3630.get_que().clear(); // clear queue in advance (just in case).
-	brd.sns_MC3630.begin(SnsMC3630::Settings(
-			SnsMC3630::MODE_LP_400HZ, SnsMC3630::RANGE_PLUS_MINUS_4G, 4)); 
-				// 400Hz, +/-4G range, get four samples (can be one sample)
-
-	b_transmit = false;
-	txid = 0xFFFF;
+	Serial << crlf << "--- PAL_MOT(OneShot):" << FOURCHARS << " wake up ---" << crlf;
+	eState = E_STATE::INIT;
 }
 
 /*** loop procedure (called every event) */
 void loop() {
 	auto&& brd = the_twelite.board.use<PAL_MOT>();
+	bool loop_more;
+	do {
+		loop_more = false;
+		// if (TickTimer.available()) Serial << '.';
+		switch(eState) {
+			case E_STATE::INIT:
+				brd.sns_MC3630.get_que().clear(); // clear queue in advance (just in case).
+				loop_more = true;
+				eState = E_STATE::START_CAPTURE;
+			break;
 
-	if (!b_transmit) {
-		if (brd.sns_MC3630.available()) {
-			brd.sns_MC3630.end(); // stop now!
+			case E_STATE::START_CAPTURE:
+				u32tick_capture = millis();
+				brd.sns_MC3630.begin(
+					// 400Hz, +/-4G range, get four samples (can be one sample)
+					SnsMC3630::Settings(
+						SnsMC3630::MODE_LP_400HZ, SnsMC3630::RANGE_PLUS_MINUS_4G, 4)); 
+				eState = E_STATE::WAIT_CAPTURE;
+			break;
 
-			Serial << "..finish sensor capture." << mwx::crlf
-				<< "  ct=" << int(brd.sns_MC3630.get_que().size());
-
-			// get all samples and average them.
-			int32_t x = 0, y = 0, z = 0;
-			for (auto&& v: brd.sns_MC3630.get_que()) {
-				x += v.x;
-				y += v.y;
-				z += v.z;
-			}
-			x /= brd.sns_MC3630.get_que().size();
-			y /= brd.sns_MC3630.get_que().size();
-			z /= brd.sns_MC3630.get_que().size();
-
-			Serial << format("/ave=%d,%d,%d", x, y, z) << mwx::crlf;
-
-			// just see X axis, min and max
-			//auto&& x_axis = get_axis_x(brd.sns_MC3630.get_que());
-			//auto&& x_minmax = std::minmax_element(x_axis.begin(), x_axis.end());
-			auto&& x_minmax = std::minmax_element(
-				get_axis_x_iter(brd.sns_MC3630.get_que().begin()),
-				get_axis_x_iter(brd.sns_MC3630.get_que().end()));
-
-			brd.sns_MC3630.get_que().clear(); // clean up the queue
-
-			// prepare tx packet
-			if (auto&& pkt = the_twelite.network.use<NWK_SIMPLE>().prepare_tx_packet()) {		
-				// set tx packet behavior
-				pkt << tx_addr(0x00)  // 0..0xFF (LID 0:parent, FE:child w/ no id, FF:LID broad cast), 0x8XXXXXXX (long address)
-					<< tx_retry(0x1) // set retry (0x1 send two times in total)
-					<< tx_packet_delay(0, 0, 2); // send packet w/ delay
-				
-				// prepare packet (first)
-				pack_bytes(pkt.get_payload() // set payload data objects.
-						, make_pair(FOURCHARS, 4)  // just to see packet identification, you can design in any.
-						, uint16_t(x)
-						, uint16_t(y)
-						, uint16_t(z)
-						, uint16_t(*x_minmax.first)  // minimum of captured x
-						, uint16_t(*x_minmax.second) // maximum of captured x
-					);
-
-				// perform transmit
-				MWX_APIRET ret = pkt.transmit();
-
-				if (ret) {
-					Serial << "..txreq(" << int(ret.get_value()) << ')';
-					txid = ret.get_value() & 0xFF;
-				} else {
-					sleepNow();
+			case E_STATE::WAIT_CAPTURE:
+				if (brd.sns_MC3630.available()) {
+					brd.sns_MC3630.end(); // stop now!
+					eState = E_STATE::REQUEST_TX; loop_more = true;
+				} else if ((millis() - u32tick_capture) > 100) {
+					Serial << crlf << "!!!FATAL: SENSOR CAPTURE TIMEOUT.";
+					eState = E_STATE::EXIT_FATAL;
 				}
-				
-				// finished tx request
-				b_transmit = true;
-			}
+			break;
+
+			case E_STATE::REQUEST_TX:
+				u32tick_tx = millis();
+				txid = TxReq();
+				if (txid) {
+					eState = E_STATE::WAIT_TX;
+				} else {
+					Serial << crlf << "!!!FATAL: TX REQUEST FAILS.";
+					eState = E_STATE::EXIT_FATAL;
+				}
+			break;
+
+			case E_STATE::WAIT_TX:
+				if(the_twelite.tx_status.is_complete(txid.get_value())) {
+					eState = E_STATE::EXIT_NORMAL; loop_more = true;
+				} else if (millis() - u32tick_tx > 100) {
+					Serial << crlf << "!!!FATAL: TX TIMEOUT.";
+					eState = E_STATE::EXIT_FATAL;
+				}
+			break;
+
+			case E_STATE::EXIT_NORMAL:
+				sleepNow();
+			break;
+
+			case E_STATE::EXIT_FATAL:
+				Serial << flush;
+				the_twelite.reset_system();
+			break;
 		}
-	} else {
-		// wait until transmit completion.
-		if(the_twelite.tx_status.is_complete(txid)) {
-			sleepNow();
+	} while(loop_more);
+}
+
+MWX_APIRET TxReq() {
+	auto&& brd = the_twelite.board.use<PAL_MOT>();
+	MWX_APIRET ret = false;
+
+	Serial << "..finish sensor capture." << crlf
+		<< "  ct=" << int(brd.sns_MC3630.get_que().size());
+
+	// get all samples and average them.
+	int32_t x = 0, y = 0, z = 0;
+	for (auto&& v: brd.sns_MC3630.get_que()) {
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+	x /= brd.sns_MC3630.get_que().size();
+	y /= brd.sns_MC3630.get_que().size();
+	z /= brd.sns_MC3630.get_que().size();
+
+	Serial << format("/ave=%d,%d,%d", x, y, z) << mwx::crlf;
+
+	// just see X axis, min and max
+	//auto&& x_axis = get_axis_x(brd.sns_MC3630.get_que());
+	//auto&& x_minmax = std::minmax_element(x_axis.begin(), x_axis.end());
+	auto&& x_minmax = std::minmax_element(
+		get_axis_x_iter(brd.sns_MC3630.get_que().begin()),
+		get_axis_x_iter(brd.sns_MC3630.get_que().end()));
+
+	brd.sns_MC3630.get_que().clear(); // clean up the queue
+
+	// prepare tx packet
+	if (auto&& pkt = the_twelite.network.use<NWK_SIMPLE>().prepare_tx_packet()) {		
+		// set tx packet behavior
+		pkt << tx_addr(0x00)  // 0..0xFF (LID 0:parent, FE:child w/ no id, FF:LID broad cast), 0x8XXXXXXX (long address)
+			<< tx_retry(0x1) // set retry (0x1 send two times in total)
+			<< tx_packet_delay(0, 0, 2); // send packet w/ delay
+		
+		// prepare packet (first)
+		pack_bytes(pkt.get_payload() // set payload data objects.
+				, make_pair(FOURCHARS, 4)  // just to see packet identification, you can design in any.
+				, uint16_t(x)
+				, uint16_t(y)
+				, uint16_t(z)
+				, uint16_t(*x_minmax.first)  // minimum of captured x
+				, uint16_t(*x_minmax.second) // maximum of captured x
+			);
+
+		// perform transmit
+		ret = pkt.transmit();
+
+		if (ret) {
+			Serial << "..txreq(" << int(ret.get_value()) << ')';
 		}
 	}
+
+	return ret;
 }
 
 void sleepNow() {
-	Serial << mwx::crlf << "..sleeping now.." << mwx::crlf << mwx::flush;
+	Serial << crlf << "..sleeping now.." << crlf << flush;
 	the_twelite.sleep(3000, false); // set longer sleep (PAL must wakeup less than 60sec.)
 }
 
-/* Copyright (C) 2019 Mono Wireless Inc. All Rights Reserved.    *
+/* Copyright (C) 2020 Mono Wireless Inc. All Rights Reserved.    *
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */
