@@ -29,7 +29,8 @@ void setup() {
 
 	// Register Network
 	auto&& nwksmpl = the_twelite.network.use<NWK_SIMPLE>();
-	nwksmpl << NWK_SIMPLE::logical_id(0x00); // set Logical ID. (0x00 means parent device)
+	nwksmpl << NWK_SIMPLE::logical_id(0x00) // set Logical ID. (0x00 means parent device)
+			;
 
 	/*** BEGIN section */
 	the_twelite.begin(); // start twelite!
@@ -55,18 +56,18 @@ void loop() {
 		//     total 11 bytes of header.
 		//     
 		//   N        : payload
-		{
+		if(0) {
 			serparser_attach pout;
 			pout.begin(PARSER::ASCII, rx.get_psRxDataApp()->auData, rx.get_psRxDataApp()->u8Len, rx.get_psRxDataApp()->u8Len);
 
 			Serial << "RAW PACKET -> ";
 			pout >> Serial;
-			Serial << mwx::flush;
+			Serial.flush();
 		}
 
 		// output type2 
 		{
-			smplbuf_u8<128> buf;
+			smplbuf_u8<256> buf;
 			pack_bytes(buf
 				, uint8_t(rx.get_addr_src_lid())		// src addr (LID)
 				, uint8_t(0xCC)							// cmd id (0xCC, fixed)
@@ -85,7 +86,7 @@ void loop() {
 			
 			Serial << "FMT PACKET -> ";
 			pout >> Serial;
-			Serial << mwx::flush;
+			Serial.flush();
 		}
 	}
 }
