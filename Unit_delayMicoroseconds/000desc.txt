@@ -1,0 +1,2 @@
+delayMicrosecondes() 例
+一定回数のﾙｰﾌﾟによる待ちを行います。TickTimerのｶｳﾝﾄ値と比較して精度を確認しています。
