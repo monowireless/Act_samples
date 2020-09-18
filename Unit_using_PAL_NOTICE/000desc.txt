@@ -1,0 +1,2 @@
+NOTICE PALのLED制御例
+NOTICE PALのLEDを制御します。シリアル入力キーに応じて点灯状態を変化させます。
