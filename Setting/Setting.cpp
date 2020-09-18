@@ -239,6 +239,6 @@ MWX_APIRET vTransmit() {
 	return MWX_APIRET(false, 0);
 }
 
-/* Copyright (C) 2019 Mono Wireless Inc. All Rights Reserved.    *
+/* Copyright (C) 2020 Mono Wireless Inc. All Rights Reserved.    *
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */

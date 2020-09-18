@@ -22,3 +22,7 @@ void begin() {
 /*** the loop procedure (called every event) */
 void loop() {
 }
+
+/* Copyright (C) 2020 Mono Wireless Inc. All Rights Reserved.    *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
+ * AGREEMENT).                                                   */
