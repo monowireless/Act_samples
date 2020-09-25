@@ -1,2 +1,4 @@
-開閉ｾﾝｻｰPAL
-開閉ｾﾝｻｰPAL(MAG)でｾﾝｻｰ値が変化に無線送信します。
+[JAPANESE]
+TITLE=開閉ｾﾝｻｰPAL
+DESC=開閉ｾﾝｻｰPAL(MAG)でｾﾝｻｰ値が変化に無線送信します。
+URL=https://mwx.twelite.info/v/latest/act_samples/pal_mag

@@ -1,2 +1,4 @@
-Serial1(UART1) 例
-UART1を初期化して動作させる例です。Serial(UART0)への入力はSerial1へ出力し、Serial1からの入力はSerialへ表示します。
+[JAPANESE]
+TITLE=Serial1(UART1) 例
+DESC=UART1を初期化して動作させる例です。Serial(UART0)への入力はSerial1へ出力し、Serial1からの入力はSerialへ表示します。
+URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts

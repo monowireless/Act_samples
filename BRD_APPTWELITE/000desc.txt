@@ -1,3 +1,5 @@
-ﾃﾞｨｼﾞﾀﾙ・ｱﾅﾛｸﾞ転送
-標準ｱﾌﾟﾘ(App_Twelite)の基本機能(DI1..4 -> DO1..4, AI1..4 -> PWM1..4)を実装します。
+[JAPANESE]
+TITLE=ﾃﾞｨｼﾞﾀﾙ・ｱﾅﾛｸﾞ転送
+DESC=標準ｱﾌﾟﾘ(App_Twelite)の基本機能(DI1..4 -> DO1..4, AI1..4 -> PWM1..4)を実装します。
 ***標準ｱﾌﾟﾘ互換ではありません***
+URL=https://mwx.twelite.info/v/latest/act_samples/brd_apptwelite

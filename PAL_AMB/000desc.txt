@@ -1,2 +1,4 @@
-環境ｾﾝｻｰPAL-ｼﾝﾌﾟﾙ版
-環境ｾﾝｻｰPALに搭載の2ｾﾝｻｰ(SHTC/LTR308ALS)を動作させｾﾝｻｰ値を送信します。
+[JAPANESE]
+TITLE=環境ｾﾝｻｰPAL-ｼﾝﾌﾟﾙ版
+DESC=環境ｾﾝｻｰPALに搭載の2ｾﾝｻｰ(SHTC/LTR308ALS)を動作させｾﾝｻｰ値を送信します。
+URL=https://mwx.twelite.info/v/latest/act_samples/pal_amb

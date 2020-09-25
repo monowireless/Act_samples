@@ -1,2 +1,4 @@
-Lチカ（LED点滅）
-Actの手始めとして、Lチカ（LED点滅）させる例です。
+[JAPANESE]
+TITLE=Lチカ（LED点滅）
+DESC=Actの手始めとして、Lチカ（LED点滅）させる例です。
+URL=https://mono-wireless.com/jp/products/act/index.html

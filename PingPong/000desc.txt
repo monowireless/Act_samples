@@ -1,2 +1,4 @@
-ピンポン
-2つ以上のﾃﾞﾊﾞｲｽに本Actを書込みます。一方のﾃﾞﾊﾞｲｽから送信された無線ﾊﾟｹｯﾄを他方から返信します。
+[JAPANESE]
+TITLE=ピンポン
+DESC=2つ以上のﾃﾞﾊﾞｲｽに本Actを書込みます。一方のﾃﾞﾊﾞｲｽから送信された無線ﾊﾟｹｯﾄを他方から返信します。
+URL=https://mwx.twelite.info/v/latest/act_samples/pingpong

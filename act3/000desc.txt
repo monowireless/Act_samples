@@ -1,2 +1,4 @@
-２つのLEDを制御
-act3は2つのTimerを用い2つのLEDを点滅させます。
+[JAPANESE]
+TITLE=２つのLEDを制御
+DESC=act3は2つのTimerを用い2つのLEDを点滅させます。
+URL=https://mono-wireless.com/jp/products/act/index.html

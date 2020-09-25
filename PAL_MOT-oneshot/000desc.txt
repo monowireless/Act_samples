@@ -1,2 +1,4 @@
-動作ｾﾝｻｰPAL-周期実行版
-動作ｾﾝｻｰPAL(MOT)を稼働させ、連続的に加速度情報を無線送信します。ｽﾘｰﾌﾟによる周期実行を行い、起床毎の加速度値を送信します。
+[JAPANESE]
+TITLE=動作ｾﾝｻｰPAL-周期実行版
+DESC=動作ｾﾝｻｰPAL(MOT)を稼働させ、連続的に加速度情報を無線送信します。ｽﾘｰﾌﾟによる周期実行を行い、起床毎の加速度値を送信します。
+URL=https://mwx.twelite.info/v/latest/act_samples/pal_mot-oneshot
