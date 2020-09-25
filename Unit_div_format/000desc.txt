@@ -1,0 +1,4 @@
+[JAPANESE]
+TITLE=div100()等の結果を書式出力
+DESC=div100()等の結果はdiv_result_i32です。書式文字列への変換div_result_i32::format()の実行例です。
+URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
