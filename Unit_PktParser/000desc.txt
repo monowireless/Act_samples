@@ -1,0 +1,4 @@
+[JAPANESE]
+TITLE=パケットパーサー
+DESC=ｼﾘｱﾙ書式でのﾒｯｾｰｼﾞの内容を更に解釈します。
+URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
