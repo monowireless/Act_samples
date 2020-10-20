@@ -38,7 +38,7 @@ void loop() {
             Serial << crlf << "z: clear area (fill w/ 0x00)";
             Serial << crlf << "r: random pattern";
             Serial << crlf << "p: write incrementally (0..255)";
-            Serial << crlf << "u: update() test";
+            Serial << crlf << "u: using update()";
             Serial << crlf << "s: using stream helper";
         break;
 
@@ -138,14 +138,18 @@ void loop() {
 
         case 's':
             {
+                // get stream helper
                 auto strm = EEPROM.get_stream_helper();
+                
+                // write data
                 strm.seek(n_area.begin());
+                uint8_t msg_hello[16] = "HELLO WORLD!";
 
-                strm << format("%08x", 0x12345678);
+                strm << format("%08x", 12345678);
                 strm << uint32_t(0x12ab34cd);
-                strm << "HELLO WORLD!";
-                strm << uint8_t(0x00); // add NUL char.
+                strm << msg_hello; // NOTE: put 16bytes of msg_hello[16].
 
+                // read data
                 strm.seek(n_area.begin());
                 uint8_t msg1[8];
                 strm >> msg1;
