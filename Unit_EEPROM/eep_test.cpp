@@ -13,7 +13,7 @@ public:
     int get_offset(int addr) { return addr - _n * BLKSIZ; } // get offset from address value
     int begin() { return get_addr(0); } // beginning index
     int end() { return get_addr(BLKSIZ); } // ending index + 1
-    void operator --() { _n--; if (_n <= 0) _n = BLKNUM - 1; }
+    void operator --() { _n--; if (_n < 0) _n = BLKNUM - 1; }
     void operator ++() { _n++; if (_n >= BLKNUM) _n = 0; }
 } n_area;
 
