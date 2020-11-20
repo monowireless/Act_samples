@@ -1,0 +1,4 @@
+[JAPANESE]
+TITLE=ADCの測定サンプル
+DESC=ADCを動作させるサンプルです。100msごとにADCを連続実行しつつ約1秒おきに読み出し表示します。[s]キーでスリープします。
+URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
