@@ -1,0 +1,4 @@
+[JAPANESE]
+TITLE=TWELITE CUEボードテスト
+DESC=TWELITE CUEの加速度ｾﾝｻｰ,磁気ｾﾝｻｰ,LEDの動作確認を行います。ﾀｰﾐﾅﾙから[a],[s],[l]ｷｰを入力します。
+URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
