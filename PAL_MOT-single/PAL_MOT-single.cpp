@@ -1,18 +1,44 @@
 // use twelite mwx c++ template library
 #include <TWELITE>
 #include <NWK_SIMPLE>
-#include <PAL_MOT>
 #include <SM_SIMPLE>
+
+#include <STG_STD>
+
+/*** board selection (choose one) */
+#define USE_PAL_MOT
+//#define USE_CUE
+// board dependend definitions.
+#if defined(USE_PAL_MOT)
+#define BRDN PAL_MOT
+#define BRDC <PAL_MOT>
+#elif defined(USE_CUE)
+#define BRDN CUE
+#define BRDC <CUE>
+#endif
+// include board support
+#include BRDC
 
 /*** Config part */
 // application ID
-const uint32_t APP_ID = 0x1234abcd;
-
+const uint32_t DEFAULT_APP_ID = 0x1234abcd;
 // channel
-const uint8_t CHANNEL = 13;
+const uint8_t DEFAULT_CHANNEL = 13;
+// option bits
+uint32_t OPT_BITS = 0;
+
+// stores sensor value
+struct {
+	int32_t x_ave, y_ave, z_ave;
+	int32_t x_min, y_min, z_min;
+	int32_t x_max, y_max, z_max;
+	uint16_t n_seq;
+	uint8_t n_samples;
+} sensor;
 
 /*** state machine */
 enum class E_STATE : uint8_t {
+	INTERACTIVE = 255,
 	INIT = 0,
 	START_CAPTURE,
 	WAIT_CAPTURE,
@@ -29,10 +55,7 @@ MWX_APIRET TxReq();
 
 /*** application use */
 const uint8_t FOURCHARS[] = "PMT2";
-uint32_t u32tick_capture; // tick when sensor capture started.
-uint32_t u32tick_tx; // tick when tx req has been placed.
-MWX_APIRET txid; // transmit request has been issued or not.
-const uint8_t MAX_SAMP_IN_PKT = 15; // max samples count in one packet.
+const uint8_t N_SAMPLES = 4;
 
 /*** setup procedure (run once at cold boot) */
 void setup() {
@@ -43,8 +66,8 @@ void setup() {
 
 	// the twelite main class
 	the_twelite
-		<< TWENET::appid(APP_ID)    // set application ID (identify network group)
-		<< TWENET::channel(CHANNEL);// set channel (pysical channel)
+		<< TWENET::appid(DEFAULT_APP_ID)    // set application ID (identify network group)
+		<< TWENET::channel(DEFAULT_CHANNEL);// set channel (pysical channel)
 		
 	// Register Network
 	auto&& nwk = the_twelite.network.use<NWK_SIMPLE>();
@@ -80,15 +103,15 @@ void loop() {
 		switch(step.state()) {
 			case E_STATE::INIT:
 				brd.sns_MC3630.get_que().clear(); // clear queue in advance (just in case).
+				memset(&sensor, 0, sizeof(sensor)); // clear sensor data
 				step.next(E_STATE::START_CAPTURE);
 			break;
 
 			case E_STATE::START_CAPTURE:
-				u32tick_capture = millis();
 				brd.sns_MC3630.begin(
-					// 400Hz, +/-4G range, get four samples (can be one sample)
+					// 400Hz, +/-4G range, get four samples and will average them.
 					SnsMC3630::Settings(
-						SnsMC3630::MODE_LP_400HZ, SnsMC3630::RANGE_PLUS_MINUS_4G, 4)); 
+						SnsMC3630::MODE_LP_400HZ, SnsMC3630::RANGE_PLUS_MINUS_4G, N_SAMPLES)); 
 
 				step.set_timeout(100);
 				step.next(E_STATE::WAIT_CAPTURE);
@@ -97,7 +120,74 @@ void loop() {
 			case E_STATE::WAIT_CAPTURE:
 				if (brd.sns_MC3630.available()) {
 					brd.sns_MC3630.end(); // stop now!
-					step.next(E_STATE::REQUEST_TX);
+
+					sensor.n_samples = brd.sns_MC3630.get_que().size();
+					if (sensor.n_samples) sensor.n_seq = brd.sns_MC3630.get_que()[0].get_t();
+					else { 
+						Serial << crlf << "!!!FATAL: NO SAMPLE.";
+						step.next(E_STATE::EXIT_FATAL);
+						break;
+					}
+					
+					Serial << "..finish sensor capture ("
+							<< "ct=" << int(sensor.n_samples)
+							<< "/sq=" << int(sensor.n_seq)
+							<< ')' << crlf
+							;
+
+					// get all samples and average them.
+					for (auto&& v: brd.sns_MC3630.get_que()) {
+						sensor.x_ave  += v.x;
+						sensor.y_ave  += v.y;
+						sensor.z_ave  += v.z;
+					}
+
+					if (sensor.n_samples == N_SAMPLES) {
+						// if N_SAMPLES == 2^n, division is much faster.
+						sensor.x_ave /= N_SAMPLES;
+						sensor.y_ave /= N_SAMPLES;
+						sensor.z_ave /= N_SAMPLES;
+					} else {
+						// should not be here, but leave this code.
+						sensor.x_ave /= sensor.n_samples;
+						sensor.y_ave /= sensor.n_samples;
+						sensor.z_ave /= sensor.n_samples;
+					}
+					Serial << format("  ave=(%d,%d,%d)", sensor.x_ave, sensor.y_ave, sensor.z_ave);
+
+					// just see min and max of X,Y,Z by std::minmax_element.
+					// can also be:
+					//	int32_t x_max = -999999, x_min = 999999;
+					//	for (auto&& v: brd.sns_MC3630.get_que()) {
+					//		if (v.x >= x_max) x_max = v.x;
+					//		if (v.y <= x_min) x_min = v.x;
+					//		...
+					//	}	
+					auto&& x_minmax = std::minmax_element(
+						get_axis_x_iter(brd.sns_MC3630.get_que().begin()),
+						get_axis_x_iter(brd.sns_MC3630.get_que().end()));
+					sensor.x_min = *x_minmax.first;
+					sensor.x_max = *x_minmax.second;
+
+					auto&& y_minmax = std::minmax_element(
+						get_axis_y_iter(brd.sns_MC3630.get_que().begin()),
+						get_axis_y_iter(brd.sns_MC3630.get_que().end()));
+					sensor.y_min = *y_minmax.first;
+					sensor.y_max = *y_minmax.second;
+
+					auto&& z_minmax = std::minmax_element(
+						get_axis_z_iter(brd.sns_MC3630.get_que().begin()),
+						get_axis_z_iter(brd.sns_MC3630.get_que().end()));
+					sensor.z_min = *z_minmax.first;
+					sensor.z_max = *z_minmax.second;
+
+					Serial << format("/min=(%d,%d,%d)", sensor.x_min, sensor.y_min, sensor.z_min);
+					Serial << format("/max=(%d,%d,%d)", sensor.x_max, sensor.y_max, sensor.z_max);
+					Serial << crlf;
+
+					brd.sns_MC3630.get_que().clear(); // clean up the queue
+
+					step.next(E_STATE::REQUEST_TX); // next state
 				} else if (step.is_timeout()) {
 					Serial << crlf << "!!!FATAL: SENSOR CAPTURE TIMEOUT.";
 					step.next(E_STATE::EXIT_FATAL);
@@ -105,8 +195,7 @@ void loop() {
 			break;
 
 			case E_STATE::REQUEST_TX:
-				txid = TxReq();
-				if (txid) {
+				if (TxReq()) {
 					step.set_timeout(100);
 					step.clear_flag();
 					step.next(E_STATE::WAIT_TX);
@@ -147,31 +236,6 @@ MWX_APIRET TxReq() {
 	auto&& brd = the_twelite.board.use<PAL_MOT>();
 	MWX_APIRET ret = false;
 
-	Serial << "..finish sensor capture." << crlf
-		<< "  ct=" << int(brd.sns_MC3630.get_que().size());
-
-	// get all samples and average them.
-	int32_t x = 0, y = 0, z = 0;
-	for (auto&& v: brd.sns_MC3630.get_que()) {
-		x += v.x;
-		y += v.y;
-		z += v.z;
-	}
-	x /= brd.sns_MC3630.get_que().size();
-	y /= brd.sns_MC3630.get_que().size();
-	z /= brd.sns_MC3630.get_que().size();
-
-	Serial << format("/ave=%d,%d,%d", x, y, z) << mwx::crlf;
-
-	// just see X axis, min and max
-	//auto&& x_axis = get_axis_x(brd.sns_MC3630.get_que());
-	//auto&& x_minmax = std::minmax_element(x_axis.begin(), x_axis.end());
-	auto&& x_minmax = std::minmax_element(
-		get_axis_x_iter(brd.sns_MC3630.get_que().begin()),
-		get_axis_x_iter(brd.sns_MC3630.get_que().end()));
-
-	brd.sns_MC3630.get_que().clear(); // clean up the queue
-
 	// prepare tx packet
 	if (auto&& pkt = the_twelite.network.use<NWK_SIMPLE>().prepare_tx_packet()) {		
 		// set tx packet behavior
@@ -182,11 +246,17 @@ MWX_APIRET TxReq() {
 		// prepare packet (first)
 		pack_bytes(pkt.get_payload() // set payload data objects.
 				, make_pair(FOURCHARS, 4)  // just to see packet identification, you can design in any.
-				, uint16_t(x)
-				, uint16_t(y)
-				, uint16_t(z)
-				, uint16_t(*x_minmax.first)  // minimum of captured x
-				, uint16_t(*x_minmax.second) // maximum of captured x
+				, uint16_t(sensor.n_seq)
+				, uint8_t(sensor.n_samples)
+				, uint16_t(sensor.x_ave)
+				, uint16_t(sensor.y_ave)
+				, uint16_t(sensor.z_ave)
+				, uint16_t(sensor.x_min)
+				, uint16_t(sensor.y_min)
+				, uint16_t(sensor.z_min)
+				, uint16_t(sensor.x_max)
+				, uint16_t(sensor.y_max)
+				, uint16_t(sensor.z_max)
 			);
 
 		// perform transmit
