@@ -2,13 +2,17 @@
 #include <TWELITE>
 #include <NWK_SIMPLE>
 #include <BRD_APPTWELITE>
+#include <STG_STD>
 
 /*** Config part */
 // application ID
-const uint32_t APP_ID = 0x1234abcd;
-
+const uint32_t DEFAULT_APP_ID = 0x1234abcd;
 // channel
-const uint8_t CHANNEL = 13;
+const uint8_t DEFAULT_CHANNEL = 13;
+// option bits
+uint32_t OPT_BITS = 0;
+// logical id
+uint8_t LID = 0;
 
 /*** function prototype */
 MWX_APIRET transmit();
@@ -16,41 +20,49 @@ void receive();
 
 /*** application defs */
 const char APP_FOURCHAR[] = "BAT1";
-uint8_t u8devid = 0;
 
+// sensor values
 uint16_t au16AI[5];
 uint8_t u8DI_BM;
 
 /*** setup procedure (run once at cold boot) */
 void setup() {
+	/*** SETUP section */	
 	// init vars
 	for(auto&& x : au16AI) x = 0xFFFF;
 	u8DI_BM = 0xFF;
 
-	/*** SETUP section */
+	// load board and settings
+	auto&& set = the_twelite.settings.use<STG_STD>();
 	auto&& brd = the_twelite.board.use<BRD_APPTWELITE>();
-
-	// check DIP sw settings
-	u8devid = (brd.get_M1()) ? 0x00 : 0xFE;
-
-	// setup analogue
-	Analogue.setup(true, ANALOGUE::KICK_BY_TIMER0); // setup analogue read (check every 16ms)
-
-	// setup buttons
-	Buttons.setup(5); // init button manager with 5 history table.
+	auto&& nwk = the_twelite.network.use<NWK_SIMPLE>();
+	
+	// settings: configure items
+	set << SETTINGS::appname("BRD_APPTWELITE");
+	set << SETTINGS::appid_default(DEFAULT_APP_ID); // set default appID
+	set << SETTINGS::ch_default(DEFAULT_CHANNEL); // set default channel
+	set.hide_items(E_STGSTD_SETID::OPT_DWORD2, E_STGSTD_SETID::OPT_DWORD3, E_STGSTD_SETID::OPT_DWORD4, E_STGSTD_SETID::ENC_KEY_STRING, E_STGSTD_SETID::ENC_MODE);
+	set.reload(); // load from EEPROM.
+	OPT_BITS = set.u32opt1(); // this value is not used in this example.
+	LID = set.u8devid(); // logical ID
 
 	// the twelite main class
 	the_twelite
-		<< TWENET::appid(APP_ID)    // set application ID (identify network group)
-		<< TWENET::channel(CHANNEL) // set channel (pysical channel)
+		<< set                      // apply settings (appid, ch, power)
 		<< TWENET::rx_when_idle();  // open receive circuit (if not set, it can't listen packts from others)
 
-	// Register Network
-	auto&& nwksmpl = the_twelite.network.use<NWK_SIMPLE>();
-	nwksmpl << NWK_SIMPLE::logical_id(u8devid); // set Logical ID. (0x00 means parent device)
+	if (brd.get_M1()) { LID = 0; }
 
+	// Register Network
+	nwk << set // apply settings (LID and retry)
+			;
+
+	// if M1 pin is set, force parent device (LID=0)
+	nwk << NWK_SIMPLE::logical_id(LID); // write logical id again.
+	
 	/*** BEGIN section */
 	// start ADC capture
+	Analogue.setup(true, ANALOGUE::KICK_BY_TIMER0); // setup analogue read (check every 16ms)
 	Analogue.begin(pack_bits(
 						BRD_APPTWELITE::PIN_AI1,
 						BRD_APPTWELITE::PIN_AI2,
@@ -62,6 +74,7 @@ void setup() {
 	Timer0.begin(32, true); // 32hz timer
 
 	// start button check
+	Buttons.setup(5); // init button manager with 5 history table.
 	Buttons.begin(pack_bits(
 						BRD_APPTWELITE::PIN_DI1,
 						BRD_APPTWELITE::PIN_DI2,
@@ -74,7 +87,19 @@ void setup() {
 	the_twelite.begin(); // start twelite!
 
 	/*** INIT message */
-	Serial << "--- BRD_APPTWELITE(" << int(u8devid) << ") ---" << mwx::crlf;
+	Serial 	<< "--- BRD_APPTWELITE ---" << mwx::crlf;
+	Serial	<< format("-- app:x%08x/ch:%d/lid:%d"
+					, the_twelite.get_appid()
+					, the_twelite.get_channel()
+					, nwk.get_config().u8Lid
+				)
+			<< mwx::crlf;
+	Serial 	<< format("-- pw:%d/retry:%d/opt:x%08x"
+					, the_twelite.get_tx_power()
+					, nwk.get_config().u8RetryDefault
+					, OPT_BITS
+			)
+			<< mwx::crlf;
 }
 
 /*** loop procedure (called every event) */
@@ -111,11 +136,6 @@ void loop() {
 			}
 		}
 	}
-
-	// receive RF packet.
-    if (the_twelite.receiver.available()) {
-		receive();
-	}
 }
 
 /*** transmit a packet */
@@ -127,7 +147,7 @@ MWX_APIRET transmit() {
 		Serial << " --> transmit" << mwx::crlf;
 
 		// set tx packet behavior
-		pkt << tx_addr(u8devid == 0 ? 0xFE : 0x00)  // 0..0xFF (LID 0:parent, FE:child w/ no id, FF:LID broad cast), 0x8XXXXXXX (long address)
+		pkt << tx_addr(LID == 0 ? 0xFE : 0x00)  // 0..0xFF (LID 0:parent, FE:child w/ no id, FF:LID broad cast), 0x8XXXXXXX (long address)
 			<< tx_retry(0x1) // set retry (0x1 send two times in total)
 			<< tx_packet_delay(0,50,10); // send packet w/ delay (send first packet with randomized delay from 100 to 200ms, repeat every 20ms)
 
@@ -147,11 +167,9 @@ MWX_APIRET transmit() {
 	return MWX_APIRET(false, 0);
 }
 
-void receive() {	
-	auto&& rx = the_twelite.receiver.read();
-	
+void on_rx_packet(packet_rx& rx, bool_t &handled) {	
 	Serial << format("..receive(%08x/%d) : ", rx.get_addr_src_long(), rx.get_addr_src_lid());
-
+	
 	// expand packet payload (shall match with sent packet data structure, see pack_bytes())
 	char fourchars[5]{}; // init all elements as default (0).
 	auto&& np = expand_bytes(rx.get_payload().begin(), rx.get_payload().end()
@@ -178,7 +196,7 @@ void receive() {
 		Serial << format("/%04d", x);
 	}
 	Serial << mwx::crlf;
-
+	
 	// set local DO
 	digitalWrite(BRD_APPTWELITE::PIN_DO1, (u8DI_BM_remote & 1) ? HIGH : LOW);
 	digitalWrite(BRD_APPTWELITE::PIN_DO2, (u8DI_BM_remote & 2) ? HIGH : LOW);

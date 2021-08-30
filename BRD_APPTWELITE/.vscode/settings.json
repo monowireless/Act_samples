@@ -1,19 +1,11 @@
 {
     "C_Cpp.default.includePath": [
-        "${env:MWSDK_ROOT}/Tools/VSCode/**",
         "${env:MWSDK_TWENET_LIBSRC}/include/**",
         "${env:MWSDK_TWENET_LIBSRC}/src/**",
-        "../../Tools/VSCode/**",
-        "../../TWENET/current/include/**",
-        "../../TWENET/current/src/**"
     ],
     "C_Cpp.default.browse.path": [
-        "${env:MWSDK_ROOT}/Tools/VSCode/**",
         "${env:MWSDK_TWENET_LIBSRC}/include/**",
         "${env:MWSDK_TWENET_LIBSRC}/src/**",
-        "../../Tools/VSCode/**",
-        "../../TWENET/current/include/**",
-        "../../TWENET/current/src/**"
     ],
     "C_Cpp.default.defines": [
         "VERSION_MAIN=0",
@@ -34,5 +26,9 @@
         "JENNIC_CHIP_FAMILY_JN516x",
         "JENNIC_STACK_MAC",
         "JENNIC_MAC_MAC",
-    ]
+    ],
+    "files.associations": {
+        "stg_std": "cpp",
+        "nwk_simple": "cpp"
+    }
 }
