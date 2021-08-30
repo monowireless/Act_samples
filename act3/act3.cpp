@@ -11,7 +11,7 @@ void setup() {
     digitalWrite(PIN_DO1, LOW); // TURN DO1 ON
 
     pinMode(PIN_DO2, OUTPUT);
-    digitalWrite(PIN_DO2, LOW); // TURN DO1 ON
+    digitalWrite(PIN_DO2, LOW); // TURN DO2 ON
 
     Timer0.begin(10); // 10Hz Timer 
     Timer1.begin(5); // 5Hz Timer 
