@@ -9,8 +9,8 @@
 //#define USE_CUE
 // board dependend definitions.
 #if defined(USE_PAL_MOT)
-#define BRDN PAL_MAG
-#define BRDC <PAL_MAG>
+#define BRDN PAL_MOT
+#define BRDC <PAL_MOT>
 #elif defined(USE_CUE)
 #define BRDN CUE
 #define BRDC <CUE>
