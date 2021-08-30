@@ -1,0 +1,113 @@
+// .vscode/tasks.json
+{
+    "version": "2.0.0",
+    // "windows": { "options": { "shell": { "executable": "bash.exe", "args": ["-c", "-l"] } } },
+    "windows": { "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } } },
+    "tasks": [
+        {
+            "label": "Full Clean",
+            "type": "shell",
+            "windows": {
+                "command": "sh",
+                "args": [
+                    "-c", "rm -rfv objs_*"
+                ]
+            },
+            "linux": {
+                "command": "rm",
+                "args": [
+                    "-rfv", "objs_*"
+                ]
+            },
+            "osx": {
+                "command": "rm",
+                "args": [
+                    "-rfv", "objs_*"
+                ]
+            },
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [
+                    "absolute"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "group": "build"
+        },
+        {
+            "label": "Build for TWELITE BLUE",
+            "type": "shell",
+            "windows": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "make ${env:MWSDK_MAKE_JOBS} ${env:MWSDK_MAKE_DISABLE_LTO} TWELITE=BLUE 2>&1 | sed -E -e s#\\(/mnt\\)?/\\([a-zA-Z]\\)/#\\\\\\2:/#g"
+                ]
+            },
+            "linux": {
+                "command": "make",
+                "args": [
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=BLUE"
+                ]
+            },
+            "osx": {
+                "command": "make",
+                "args": [
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=BLUE"
+                ]
+            },
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [
+                    "absolute"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build for TWELITE RED",
+            "type": "shell",
+            "windows": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "make ${env:MWSDK_MAKE_JOBS} ${env:MWSDK_MAKE_DISABLE_LTO} TWELITE=RED 2>&1 | sed -E -e s#\\(/mnt\\)?/\\([a-zA-Z]\\)/#\\\\\\2:/#g"
+                ]
+            },
+            "linux": {
+                "command": "make",
+                "args": [
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=RED"
+                ]
+            },
+            "osx": {
+                "command": "make",
+                "args": [
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=RED"
+                ]
+            },
+            "problemMatcher": {
+                "base": "$gcc",
+                "fileLocation": [
+                    "absolute"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "group": "build"
+        }
+    ]
+}
