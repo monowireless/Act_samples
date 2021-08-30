@@ -56,7 +56,7 @@ void loop() {
 		Buttons.read(bm, cm);
 
 		if (cm & 0x80000000) {
-			// the first capture.
+			// the first capture. (skip it!)
 		}
 
 		Serial << int(millis()) << ":BTN" << format("%b") << mwx::crlf;
@@ -101,14 +101,6 @@ void loop() {
 		// just dump a packet.
 		Serial << format("rx from %08x/%d", rx.get_addr_src_long(), rx.get_addr_src_lid()) << mwx::crlf;
 	}
-
-	// check tx completion
-	if (txreq_stat) {
-		if (the_twelite.tx_status.is_complete(txreq_stat.get_value())) {
-			Serial << int(millis()) << ":tx completed! (" << int(txreq_stat.get_value()) << ')' << mwx::crlf;
-			txreq_stat = MWX_APIRET(false, 0);
-		}
-	}
 }
 
 void wakeup() {
@@ -137,6 +129,15 @@ MWX_APIRET vTransmit() {
 	}
 
 	return MWX_APIRET(false, 0);
+}
+
+void on_rx_packet(packet_rx& rx, bool_t &handled) {
+	Serial << format("rx from %08x/%d", rx.get_addr_src_long(), rx.get_addr_src_lid()) << mwx::crlf;
+}
+
+void on_tx_comp(mwx::packet_ev_tx& ev, bool_t &b_handled) {
+	Serial << int(millis()) << ":tx completed! (" << int(txreq_stat.get_value()) << ')' << mwx::crlf;
+	txreq_stat = MWX_APIRET(false, 0);
 }
 
 /* Copyright (C) 2019-2020 Mono Wireless Inc. All Rights Reserved.    *

@@ -77,53 +77,9 @@ void loop() {
 			vTransmit(MSG_PING, 0xFF);
 		}
 	}
-
-	// receive RF packet.
-    while (the_twelite.receiver.available()) {
-		auto&& rx = the_twelite.receiver.read();
-
-		// rx >> Serial; // debugging (display longer packet information)
-
-		uint8_t msg[MSG_LEN];
-		uint16_t adcval, volt;
-		uint32_t timestamp;
-
-		// expand packet payload (shall match with sent packet data structure, see pack_bytes())
-		expand_bytes(rx.get_payload().begin(), rx.get_payload().end()
-					, msg       // 4bytes of msg
-								//   also can be -> std::make_pair(&msg[0], MSG_LEN)
-					, adcval    // 2bytes, A1 value [0..1023]
-				    , volt      // 2bytes, Module VCC[mV]
-					, timestamp // 4bytes of timestamp
-        );
-		
-		// if PING packet, respond pong!
-        if (!strncmp((const char*)msg, "PING", MSG_LEN)) {
-			// transmit a PONG packet with specifying the address.
-            vTransmit(MSG_PONG, rx.get_psRxDataApp()->u32SrcAddr);
-        }
-
-		// display the packet
-		Serial << format("<RX ad=%x/lq=%d/ln=%d/sq=%d:" // note: up to 4 args!
-                    , rx.get_psRxDataApp()->u32SrcAddr
-                    , rx.get_lqi()
-                    , rx.get_length()
-					, rx.get_psRxDataApp()->u8Seq
-                    )
-				<< format(" %s AD=%d V=%d TS=%dms>" // note: up to 4 args!
-					, msg
-					, adcval
-					, volt
-					, timestamp
-					)
-               << mwx::crlf
-			   << mwx::flush;
-	}
 }
 
 /**
- * @fn	void vTransmit(const char *msg, uint32_t addr)
- *
  * @brief	Transmits the given message.
  *
  *          The packet data structure is:
@@ -156,4 +112,49 @@ void vTransmit(const char* msg, uint32_t addr) {
 		// do transmit 
 		pkt.transmit();
 	}
+}
+
+/**
+ * @brief receive packet callback
+ * 
+ * @param rx      received data object.
+ * @param handled DO NOT CHANGE, in system use.
+ */
+void on_rx_packet(packet_rx& rx, bool_t &handled) {
+	// rx >> Serial; // debugging (display longer packet information)
+
+	uint8_t msg[MSG_LEN];
+	uint16_t adcval, volt;
+	uint32_t timestamp;
+
+	// expand packet payload (shall match with sent packet data structure, see pack_bytes())
+	expand_bytes(rx.get_payload().begin(), rx.get_payload().end()
+				, msg       // 4bytes of msg
+							//   also can be -> std::make_pair(&msg[0], MSG_LEN)
+				, adcval    // 2bytes, A1 value [0..1023]
+				, volt      // 2bytes, Module VCC[mV]
+				, timestamp // 4bytes of timestamp
+	);
+	
+	// if PING packet, respond pong!
+	if (!strncmp((const char*)msg, "PING", MSG_LEN)) {
+		// transmit a PONG packet with specifying the address.
+		vTransmit(MSG_PONG, rx.get_psRxDataApp()->u32SrcAddr);
+	}
+
+	// display the packet
+	Serial << format("<RX ad=%x/lq=%d/ln=%d/sq=%d:" // note: up to 4 args!
+				, rx.get_psRxDataApp()->u32SrcAddr
+				, rx.get_lqi()
+				, rx.get_length()
+				, rx.get_psRxDataApp()->u8Seq
+				)
+			<< format(" %s AD=%d V=%d TS=%dms>" // note: up to 4 args!
+				, msg
+				, adcval
+				, volt
+				, timestamp
+				)
+			<< mwx::crlf
+			<< mwx::flush;
 }
