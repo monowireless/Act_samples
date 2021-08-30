@@ -2,6 +2,7 @@
 #include <TWELITE>
 #include <NWK_SIMPLE>
 #include <PAL_MOT>
+#include <SM_SIMPLE>
 
 /*** Config part */
 // application ID
@@ -11,7 +12,7 @@ const uint32_t APP_ID = 0x1234abcd;
 const uint8_t CHANNEL = 13;
 
 /*** state machine */
-enum class E_STATE {
+enum class E_STATE : uint8_t {
 	INIT = 0,
 	START_CAPTURE,
 	WAIT_CAPTURE,
@@ -19,7 +20,8 @@ enum class E_STATE {
 	WAIT_TX,
 	EXIT_NORMAL,
 	EXIT_FATAL
-} eState;
+};
+SM_SIMPLE<E_STATE> step;
 
 /*** function prototype */
 void sleepNow();
@@ -35,7 +37,6 @@ const uint8_t MAX_SAMP_IN_PKT = 15; // max samples count in one packet.
 /*** setup procedure (run once at cold boot) */
 void setup() {
 	/*** SETUP section */
-
 	// board
 	auto&& brd = the_twelite.board.use<PAL_MOT>();
 	brd.set_led(LED_TIMER::BLINK, 100);
@@ -52,6 +53,9 @@ void setup() {
 	/*** BEGIN section */
 	the_twelite.begin(); // start twelite!
 
+	/*** State Machine */
+	step.setup();
+
 	/*** INIT message */
 	Serial << crlf << "--- PAL_MOT(OneShot):" << FOURCHARS << " ---" << crlf;
 }
@@ -65,21 +69,18 @@ void begin() {
 /*** when waking up */
 void wakeup() {
 	Serial << crlf << "--- PAL_MOT(OneShot):" << FOURCHARS << " wake up ---" << crlf;
-	eState = E_STATE::INIT;
 }
 
 /*** loop procedure (called every event) */
 void loop() {
 	auto&& brd = the_twelite.board.use<PAL_MOT>();
-	bool loop_more;
+
 	do {
-		loop_more = false;
 		// if (TickTimer.available()) Serial << '.';
-		switch(eState) {
+		switch(step.state()) {
 			case E_STATE::INIT:
 				brd.sns_MC3630.get_que().clear(); // clear queue in advance (just in case).
-				loop_more = true;
-				eState = E_STATE::START_CAPTURE;
+				step.next(E_STATE::START_CAPTURE);
 			break;
 
 			case E_STATE::START_CAPTURE:
@@ -88,36 +89,40 @@ void loop() {
 					// 400Hz, +/-4G range, get four samples (can be one sample)
 					SnsMC3630::Settings(
 						SnsMC3630::MODE_LP_400HZ, SnsMC3630::RANGE_PLUS_MINUS_4G, 4)); 
-				eState = E_STATE::WAIT_CAPTURE;
+
+				step.set_timeout(100);
+				step.next(E_STATE::WAIT_CAPTURE);
 			break;
 
 			case E_STATE::WAIT_CAPTURE:
 				if (brd.sns_MC3630.available()) {
 					brd.sns_MC3630.end(); // stop now!
-					eState = E_STATE::REQUEST_TX; loop_more = true;
-				} else if ((millis() - u32tick_capture) > 100) {
+					step.next(E_STATE::REQUEST_TX);
+				} else if (step.is_timeout()) {
 					Serial << crlf << "!!!FATAL: SENSOR CAPTURE TIMEOUT.";
-					eState = E_STATE::EXIT_FATAL;
+					step.next(E_STATE::EXIT_FATAL);
 				}
 			break;
 
 			case E_STATE::REQUEST_TX:
-				u32tick_tx = millis();
 				txid = TxReq();
 				if (txid) {
-					eState = E_STATE::WAIT_TX;
+					step.set_timeout(100);
+					step.clear_flag();
+					step.next(E_STATE::WAIT_TX);
 				} else {
 					Serial << crlf << "!!!FATAL: TX REQUEST FAILS.";
-					eState = E_STATE::EXIT_FATAL;
+					step.next(E_STATE::EXIT_FATAL);
 				}
 			break;
 
 			case E_STATE::WAIT_TX:
-				if(the_twelite.tx_status.is_complete(txid.get_value())) {
-					eState = E_STATE::EXIT_NORMAL; loop_more = true;
-				} else if (millis() - u32tick_tx > 100) {
+				if (step.is_flag_ready()) {
+					step.next(E_STATE::EXIT_NORMAL);
+				}
+				if (step.is_timeout()) {
 					Serial << crlf << "!!!FATAL: TX TIMEOUT.";
-					eState = E_STATE::EXIT_FATAL;
+					step.next(E_STATE::EXIT_FATAL);
 				}
 			break;
 
@@ -130,7 +135,12 @@ void loop() {
 				the_twelite.reset_system();
 			break;
 		}
-	} while(loop_more);
+	} while(step.b_more_loop());
+}
+
+// when finishing data transmit, set the flag.
+void on_tx_comp(mwx::packet_ev_tx& ev, bool_t &b_handled) {
+	step.set_flag(ev.bStatus);
 }
 
 MWX_APIRET TxReq() {
@@ -191,7 +201,9 @@ MWX_APIRET TxReq() {
 }
 
 void sleepNow() {
-	Serial << crlf << "..sleeping now.." << crlf << flush;
+	Serial << crlf << "..sleeping now.." << crlf;
+	Serial.flush();
+	step.on_sleep(false); // reset state machine.
 	the_twelite.sleep(3000, false); // set longer sleep (PAL must wakeup less than 60sec.)
 }
 
