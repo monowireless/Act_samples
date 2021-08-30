@@ -2,6 +2,7 @@
 {
     "version": "2.0.0",
     // "windows": { "options": { "shell": { "executable": "bash.exe", "args": ["-c", "-l"] } } },
+    "windows": { "options": { "shell": { "executable": "cmd.exe", "args": ["/c"] } } },
     "tasks": [
         {
             "label": "Full Clean",
@@ -10,23 +11,18 @@
                 "command": "sh",
                 "args": [
                     "-c", "rm -rfv objs_*"
-                ],
-                "options": {
-                    "env": {
-                        "PATH": "..\\..\\..\\Tools\\MinGW\\msys\\1.0\\bin"
-                    }
-                }
+                ]
             },
             "linux": {
-                "command": "sh",
+                "command": "rm",
                 "args": [
-                    "-l", "-c", "rm -rfv objs_*"
+                    "-rfv", "objs_*"
                 ]
             },
             "osx": {
-                "command": "sh",
+                "command": "rm",
                 "args": [
-                    "-l", "-c", "rm -rfv objs_*"
+                    "-rfv", "objs_*"
                 ]
             },
             "problemMatcher": {
@@ -46,28 +42,22 @@
             "windows": {
                 "command": "sh",
                 "args": [
-                    "-c", "make TWELITE=BLUE 2>&1 | sed -E -e s#\\(/mnt\\)?/\\([a-zA-Z]\\)/#\\\\\\2:/#g"
-                ],
-                "options": {
-                    "env": {
-                        "PATH": "..\\..\\..\\Tools\\MinGW\\msys\\1.0\\bin"
-                    }
-                }
+                    "-c",
+                    "make ${env:MWSDK_MAKE_JOBS} ${env:MWSDK_MAKE_DISABLE_LTO} TWELITE=BLUE 2>&1 | sed -E -e s#\\(/mnt\\)?/\\([a-zA-Z]\\)/#\\\\\\2:/#g"
+                ]
             },
             "linux": {
-                "command": "sh",
+                "command": "make",
                 "args": [
-                    "-l", "-c", "make",
-                    "TWELITE=BLUE",
-                    ""
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=BLUE"
                 ]
             },
             "osx": {
-                "command": "sh",
+                "command": "make",
                 "args": [
-                    "-l", "-c", "make",
-                    "TWELITE=BLUE",
-                    ""
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=BLUE"
                 ]
             },
             "problemMatcher": {
@@ -90,28 +80,22 @@
             "windows": {
                 "command": "sh",
                 "args": [
-                    "-c", "make TWELITE=RED 2>&1 | sed -E -e s#\\(/mnt\\)?/\\([a-zA-Z]\\)/#\\\\\\2:/#g"
-                ],
-                "options": {
-                    "env": {
-                        "PATH": "..\\..\\..\\Tools\\MinGW\\msys\\1.0\\bin"
-                    }
-                }
+                    "-c",
+                    "make ${env:MWSDK_MAKE_JOBS} ${env:MWSDK_MAKE_DISABLE_LTO} TWELITE=RED 2>&1 | sed -E -e s#\\(/mnt\\)?/\\([a-zA-Z]\\)/#\\\\\\2:/#g"
+                ]
             },
             "linux": {
-                "command": "sh",
+                "command": "make",
                 "args": [
-                    "-l", "-c", "make",
-                    "TWELITE=RED",
-                    ""
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=RED"
                 ]
             },
             "osx": {
-                "command": "sh",
+                "command": "make",
                 "args": [
-                    "-l", "-c", "make",
-                    "TWELITE=RED",
-                    ""
+                    "${env:MWSDK_MAKE_JOBS}",
+                    "TWELITE=RED"
                 ]
             },
             "problemMatcher": {
