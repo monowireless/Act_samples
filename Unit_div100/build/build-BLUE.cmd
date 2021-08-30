@@ -2,7 +2,7 @@
 
 if not exist %MWSDK_ROOT_WINNAME%\000manifest GOTO ENVERR
 
-SET PATH=%MWSDK_ROOT_WINNAME%\Tools\MinGW\msys\1.0\bin;%PATH%
+SET PATH=%MWSDK_ROOT_WINNAME%\..\Tools\MinGW\msys\1.0\bin;%PATH%
 
 SET F=%~n0
 SET FARG=%F:build-=%

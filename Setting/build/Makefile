@@ -40,7 +40,7 @@ VERSION_VAR  = 0
 
 ### C++ flags passed to g++
 # e.g. CXXFLAGS += -DMY_DEFS
-#CXXFLAGS +=
+CXXFLAGS += -DSIZE_SETSTD_CUST_COMMON=32
 
 ### C++/C flags passed to g++/gcc
 # e.g. CFLAGS += -DMY_DEFS
