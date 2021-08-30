@@ -37,7 +37,7 @@ struct {
 } sensor;
 
 /*** state machine */
-enum class E_STATE : uint8_t {
+enum class STATE : uint8_t {
 	INTERACTIVE = 255,
 	INIT = 0,
 	START_CAPTURE,
@@ -47,7 +47,7 @@ enum class E_STATE : uint8_t {
 	EXIT_NORMAL,
 	EXIT_FATAL
 };
-SM_SIMPLE<E_STATE> step;
+SM_SIMPLE<STATE> step;
 
 /*** function prototype */
 void sleepNow();
@@ -60,33 +60,67 @@ const uint8_t N_SAMPLES = 4;
 /*** setup procedure (run once at cold boot) */
 void setup() {
 	/*** SETUP section */
-	// board
-	auto&& brd = the_twelite.board.use<PAL_MOT>();
-	brd.set_led(LED_TIMER::BLINK, 100);
+	/// init vars or objects
+	step.setup(); // init state machine	
+	
+	/// load board and settings objects
+	auto&& brd = the_twelite.board.use BRDC (); // load board support
+	auto&& set = the_twelite.settings.use<STG_STD>(); // load save/load settings(interactive mode) support
+	auto&& nwk = the_twelite.network.use<NWK_SIMPLE>(); // load network support
 
+	// settings: configure items
+	set << SETTINGS::appname("MOT");
+	set << SETTINGS::appid_default(DEFAULT_APP_ID); // set default appID
+	set << SETTINGS::ch_default(DEFAULT_CHANNEL); // set default channel
+	set << SETTINGS::lid_default(0x1); // set default LID
+	set.hide_items(E_STGSTD_SETID::OPT_DWORD2, E_STGSTD_SETID::OPT_DWORD3, E_STGSTD_SETID::OPT_DWORD4, E_STGSTD_SETID::ENC_KEY_STRING, E_STGSTD_SETID::ENC_MODE);
+	
+	// if SET=LOW is detected, start with intaractive mode.
+	if (digitalRead(brd.PIN_SET) == PIN_STATE::LOW) {
+		set << SETTINGS::open_at_start();
+		step.next(STATE::INTERACTIVE);
+		return;
+	}
+
+	// load settings
+	set.reload(); // load from EEPROM.
+	OPT_BITS = set.u32opt1(); // this value is not used in this example.
+	
 	// the twelite main class
-	the_twelite
-		<< TWENET::appid(DEFAULT_APP_ID)    // set application ID (identify network group)
-		<< TWENET::channel(DEFAULT_CHANNEL);// set channel (pysical channel)
-		
+	the_twelite << set; // apply settings (appid, ch, power)
+	
 	// Register Network
-	auto&& nwk = the_twelite.network.use<NWK_SIMPLE>();
-	nwk	<< NWK_SIMPLE::logical_id(0xFE); // set Logical ID. (0xFE means a child device with no ID)
+	nwk << set; // apply LID and retry.
+
+	/*** HARDWARE setup section */
+	brd.set_led(LED_TIMER::BLINK, 100);
 
 	/*** BEGIN section */
 	the_twelite.begin(); // start twelite!
 
-	/*** State Machine */
-	step.setup();
-
 	/*** INIT message */
-	Serial << crlf << "--- PAL_MOT(OneShot):" << FOURCHARS << " ---" << crlf;
+	Serial << "--- MOT:" << FOURCHARS << " ---" << mwx::crlf;
+	Serial	<< format("-- app:x%08x/ch:%d/lid:%d"
+					, the_twelite.get_appid()
+					, the_twelite.get_channel()
+					, nwk.get_config().u8Lid
+				)
+			<< mwx::crlf;
+	Serial 	<< format("-- pw:%d/retry:%d/opt:x%08x"
+					, the_twelite.get_tx_power()
+					, nwk.get_config().u8RetryDefault
+					, OPT_BITS
+			)
+			<< mwx::crlf;
 }
 
 /*** the first call after finishing setup() */
 void begin() { 
-	// sleep immediately, waiting for the first capture.
-	sleepNow();
+	auto&& set = the_twelite.settings.use<STG_STD>();
+	if (!set.is_screen_opened()) {
+		// sleep immediately, waiting for the first capture.
+		sleepNow();
+	}
 }
 
 /*** when waking up */
@@ -99,25 +133,27 @@ void loop() {
 	auto&& brd = the_twelite.board.use<PAL_MOT>();
 
 	do {
-		// if (TickTimer.available()) Serial << '.';
 		switch(step.state()) {
-			case E_STATE::INIT:
+			case STATE::INTERACTIVE:
+			break;
+			
+			case STATE::INIT:
 				brd.sns_MC3630.get_que().clear(); // clear queue in advance (just in case).
 				memset(&sensor, 0, sizeof(sensor)); // clear sensor data
-				step.next(E_STATE::START_CAPTURE);
+				step.next(STATE::START_CAPTURE);
 			break;
 
-			case E_STATE::START_CAPTURE:
+			case STATE::START_CAPTURE:
 				brd.sns_MC3630.begin(
 					// 400Hz, +/-4G range, get four samples and will average them.
 					SnsMC3630::Settings(
 						SnsMC3630::MODE_LP_400HZ, SnsMC3630::RANGE_PLUS_MINUS_4G, N_SAMPLES)); 
 
 				step.set_timeout(100);
-				step.next(E_STATE::WAIT_CAPTURE);
+				step.next(STATE::WAIT_CAPTURE);
 			break;
 
-			case E_STATE::WAIT_CAPTURE:
+			case STATE::WAIT_CAPTURE:
 				if (brd.sns_MC3630.available()) {
 					brd.sns_MC3630.end(); // stop now!
 
@@ -125,7 +161,7 @@ void loop() {
 					if (sensor.n_samples) sensor.n_seq = brd.sns_MC3630.get_que()[0].get_t();
 					else { 
 						Serial << crlf << "!!!FATAL: NO SAMPLE.";
-						step.next(E_STATE::EXIT_FATAL);
+						step.next(STATE::EXIT_FATAL);
 						break;
 					}
 					
@@ -187,39 +223,39 @@ void loop() {
 
 					brd.sns_MC3630.get_que().clear(); // clean up the queue
 
-					step.next(E_STATE::REQUEST_TX); // next state
+					step.next(STATE::REQUEST_TX); // next state
 				} else if (step.is_timeout()) {
 					Serial << crlf << "!!!FATAL: SENSOR CAPTURE TIMEOUT.";
-					step.next(E_STATE::EXIT_FATAL);
+					step.next(STATE::EXIT_FATAL);
 				}
 			break;
 
-			case E_STATE::REQUEST_TX:
+			case STATE::REQUEST_TX:
 				if (TxReq()) {
 					step.set_timeout(100);
 					step.clear_flag();
-					step.next(E_STATE::WAIT_TX);
+					step.next(STATE::WAIT_TX);
 				} else {
 					Serial << crlf << "!!!FATAL: TX REQUEST FAILS.";
-					step.next(E_STATE::EXIT_FATAL);
+					step.next(STATE::EXIT_FATAL);
 				}
 			break;
 
-			case E_STATE::WAIT_TX:
+			case STATE::WAIT_TX:
 				if (step.is_flag_ready()) {
-					step.next(E_STATE::EXIT_NORMAL);
+					step.next(STATE::EXIT_NORMAL);
 				}
 				if (step.is_timeout()) {
 					Serial << crlf << "!!!FATAL: TX TIMEOUT.";
-					step.next(E_STATE::EXIT_FATAL);
+					step.next(STATE::EXIT_FATAL);
 				}
 			break;
 
-			case E_STATE::EXIT_NORMAL:
+			case STATE::EXIT_NORMAL:
 				sleepNow();
 			break;
 
-			case E_STATE::EXIT_FATAL:
+			case STATE::EXIT_FATAL:
 				Serial << flush;
 				the_twelite.reset_system();
 			break;
