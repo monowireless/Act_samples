@@ -69,8 +69,8 @@ const TWESTG_tsElement SET_STD_DEFSETS[SIZE_SET_STD_DEFSETS] = {
 #endif
 
 const TWESTG_tsMsgReplace SET_MSGS[] = {
-	{ E_TWESTG_DEFSETS_OPTBITS,    "オプション1", "オプション１を設定してください" },
-	{ E_TWESTG_DEFSETS_OPT_DWORD1, "オプション2", "オプション２を設定してください\r\nとりあえず\r\n" },
+	{ (uint8_t)E_STGSTD_SETID::OPTBITS,    "ｵﾌﾟｼｮﾝﾋﾞｯﾄ", "オプション１を設定してください" },
+	{ (uint8_t)E_STGSTD_SETID::OPT_DWORD2, "オプション2", "オプション２を設定してください\r\nとりあえず\r\n" },
 	{ E_TWESTG_DEFSETS_VOID } // terminator
 };
 
@@ -110,11 +110,31 @@ void setup() {
 	// common configs
 	set << SETTINGS::appname(APP_NAME)          // set application name appears in interactive setting menu.
 		<< SETTINGS::appid_default(DEF_APP_ID)  // set the default application ID.
-		<< SETTINGS::open_at_start();
+		<< SETTINGS::ch_default(DEF_CHANNEL)    // set default channel
+		<< SETTINGS::lid_default(7)             // set default logical id
+		//<< SETTINGS::open_at_start()            // if set, show the mode at the initial.
+		;
 	
 	// more detailed configs...
 	set.replace_item_name_desc(SET_MSGS); // replace names and descs
-	set.hide_items(E_TWESTG_DEFSETS_OPT_DWORD2, E_TWESTG_DEFSETS_OPT_DWORD3); // hide some item(s).
+
+	// hide some items
+	bool apiret = set.hide_items(
+		//E_STGSTD_SETID::APPID, // never be removed
+		E_STGSTD_SETID::LOGICALID, // never be removed
+		E_STGSTD_SETID::CHANNEL, // never be removed
+		//E_STGSTD_SETID::CHANNELS_3, // hide default
+		//E_STGSTD_SETID::POWER_N_RETRY,
+		//E_STGSTD_SETID::OPTBITS, // show it (for example)
+		E_STGSTD_SETID::UARTBAUD,
+		
+		//E_STGSTD_SETID::OPT_DWORD2,
+		E_STGSTD_SETID::OPT_DWORD3, 
+		E_STGSTD_SETID::OPT_DWORD4,
+		E_STGSTD_SETID::ENC_MODE,
+		E_STGSTD_SETID::ENC_KEY_STRING
+		); // hide some item(s).
+	Serial << format("hide_items %d", apiret) << crlf;
 
 	// acquired EEPROM saved data	
 	set.reload(); // must call this before getting data, if configuring method is called.
@@ -125,13 +145,26 @@ void setup() {
 
 	/// the twelite main class
 	the_twelite
-		<< TWENET::appid(APP_ID)    // set application ID (identify network group)
-		<< TWENET::channel(CHANNEL) // set channel (pysical channel)
+		//<< TWENET::appid(APP_ID)    // set application ID (identify network group)
+		//<< TWENET::channel(CHANNEL) // set channel (pysical channel)
+		<< set                      // APP_ID, CHANNEL, POWER, RETRY setting will be applied.
 		<< TWENET::rx_when_idle();  // open receive circuit (if not set, it can't listen packts from others)
+
+	// check if set obj did well.
+	the_twelite >> Serial;
 
 	/// Register Network
 	auto&& nwk = the_twelite.network.use<NWK_SIMPLE>();
-	nwk	<< NWK_SIMPLE::logical_id(LID); // set Logical ID. (0xFE means a child device with no ID)
+	nwk	//<< NWK_SIMPLE::logical_id(LID) // set Logical ID. (0xFE means a child device with no ID)
+		<< set // LID/REPERATMAX will be set from interactive mode.
+		;
+
+	// check if set obj did well.
+	Serial 	<< format("nwk << set: LID=%d RPT=%d"
+						, nwk.get_config().u8Lid
+						, nwk.get_config().u8RepeatMax
+					)
+			<< mwx::crlf;
 
 	/*** BEGIN section */
 	Buttons.begin(pack_bits(PIN_BTN), 5, 10); // check every 10ms, a change is reported by 5 consequent values.
