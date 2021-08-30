@@ -2,87 +2,172 @@
 #include <TWELITE>
 #include <NWK_SIMPLE>
 #include <PAL_AMB> // include the board support of PAL_AMB
+#include <STG_STD>
+#include <SM_SIMPLE>
 
 /*** Config part */
 // application ID
-const uint32_t APP_ID = 0x1234abcd;
-
+const uint32_t DEFAULT_APP_ID = 0x1234abcd;
 // channel
-const uint8_t CHANNEL = 13;
-
-// id
-uint8_t u8ID = 0;
+const uint8_t DEFAULT_CHANNEL = 13;
+// option bits
+uint32_t OPT_BITS = 0;
+// logical id
+uint8_t LID = 0;
 
 // application use
-const uint8_t FOURCHARS[] = "PAB1";
+const char FOURCHARS[] = "PAB1";
 
-bool b_transmit = false;
-uint8_t u8txid = 0;
+// stores sensor value
+struct {
+	uint32_t u32luminance;
+	int16_t i16temp;
+	int16_t i16humid;
+} sensor;
+
+// application state defs
+enum class STATE : uint8_t {
+	INTERACTIVE = 255,
+	INIT = 0,
+	SENSOR,
+	TX,
+	TX_WAIT_COMP,
+	GO_SLEEP
+};
+
+// simple state machine.
+SM_SIMPLE<STATE> step;
 
 /*** Local function prototypes */
 void sleepNow();
-void startSensorCapture();
 
 /*** setup procedure (run once at cold boot) */
 void setup() {
 	/*** SETUP section */
-	// use PAL_AMB board support.
-	auto&& brd = the_twelite.board.use<PAL_AMB>();
-	// now it can read DIP sw status.
-	u8ID = (brd.get_DIPSW_BM() & 0x07) + 1;
-	if (u8ID == 0) u8ID = 0xFE; // 0 is to 0xFE
+	/// init vars or objects
+	step.setup(); // ステートマシンの初期化	
+	
+	/// load board and settings objects
+	auto&& brd = the_twelite.board.use<PAL_AMB>(); // load board support
+	auto&& set = the_twelite.settings.use<STG_STD>(); // load save/load settings(interactive mode) support
+	auto&& nwk = the_twelite.network.use<NWK_SIMPLE>(); // load network support
 
+	/// configure settings
+	// configure settings
+	set << SETTINGS::appname("AMB");
+	set << SETTINGS::appid_default(DEFAULT_APP_ID); // set default appID
+	set << SETTINGS::ch_default(DEFAULT_CHANNEL); // set default channel
+	set.hide_items(E_STGSTD_SETID::OPT_DWORD2, E_STGSTD_SETID::OPT_DWORD3, E_STGSTD_SETID::OPT_DWORD4, E_STGSTD_SETID::ENC_KEY_STRING, E_STGSTD_SETID::ENC_MODE);
+
+	// if SET=LOW is detected, start with intaractive mode.
+	if (digitalRead(brd.PIN_BTN) == PIN_STATE::LOW) {
+		set << SETTINGS::open_at_start();
+		step.next(STATE::INTERACTIVE);
+		return;
+	}
+
+	// load values
+	set.reload(); // load from EEPROM.
+	OPT_BITS = set.u32opt1(); // this value is not used in this example.
+	
+	// LID is configured DIP or settings.
+	LID = (brd.get_DIPSW_BM() & 0x07); // 1st priority is DIP SW
+	if (LID == 0) LID = set.u8devid(); // 2nd is setting.
+	if (LID == 0) LID = 0xFE; // if still 0, set 0xFE (anonymous child)
+
+	/// configure system basics
+	the_twelite << set; // apply settings (from interactive mode)
+
+	/// configure network
+	nwk << set; // apply settings (from interactive mode)
+	nwk << NWK_SIMPLE::logical_id(LID); // set LID again (LID can also be configured by DIP-SW.)	
+
+	/// configure hardware
 	// LED setup (use periph_led_timer, which will re-start on wakeup() automatically)
 	brd.set_led(LED_TIMER::BLINK, 10); // blink (on 10ms/ off 10ms)
-
-	// the twelite main object.
-	the_twelite
-		<< TWENET::appid(APP_ID)     // set application ID (identify network group)
-		<< TWENET::channel(CHANNEL); // set channel (pysical channel)
-
-	// Register Network
-	auto&& nwk = the_twelite.network.use<NWK_SIMPLE>();
-	nwk << NWK_SIMPLE::logical_id(u8ID); // set Logical ID. (0xFE means a child device with no ID)
-
+	
 	/*** BEGIN section */
 	Wire.begin(); // start two wire serial bus.
 	Analogue.begin(pack_bits(PIN_ANALOGUE::A1, PIN_ANALOGUE::VCC)); // _start continuous adc capture.
-
-	the_twelite.begin(); // start twelite!
-
-	startSensorCapture();
+	
+	// let the TWELITE begin!
+	the_twelite.begin();
 
 	/*** INIT message */
-	Serial << "--- PAL_AMB:" << FOURCHARS << " ---" << mwx::crlf;
+	Serial << "--- AMB:" << FOURCHARS << " ---" << mwx::crlf;
+	Serial	<< format("-- app:x%08x/ch:%d/lid:%d"
+					, the_twelite.get_appid()
+					, the_twelite.get_channel()
+					, nwk.get_config().u8Lid
+				)
+			<< mwx::crlf;
+	Serial 	<< format("-- pw:%d/retry:%d/opt:x%08x"
+					, the_twelite.get_tx_power()
+					, nwk.get_config().u8RetryDefault
+					, OPT_BITS
+			)
+			<< mwx::crlf;
+}
+
+// wakeup procedure
+void wakeup() {
+	Serial	<< mwx::crlf
+			<< "--- AMB:" << FOURCHARS << " wake up ---"
+			<< mwx::crlf
+			<< "..start sensor capture again."
+			<< mwx::crlf;
 }
 
 /*** loop procedure (called every event) */
 void loop() {
 	auto&& brd = the_twelite.board.use<PAL_AMB>();
 
-	// mostly process every ms.
-	if (TickTimer.available()) {
+	do {
+		switch (step.state()) {
+		case STATE::INTERACTIVE:
+		break;
 		
-		//  wait until sensor capture finish
-		if (!brd.sns_LTR308ALS.available()) {
-			// this will take around 50ms.
-			// note: to save battery life, perform sleeping to wait finish of sensor capture.
-			brd.sns_LTR308ALS.process_ev(E_EVENT_TICK_TIMER);
-		}
+		case STATE::INIT: // starting state
+			// start sensor capture
+			brd.sns_SHTC3.begin();
+			brd.sns_LTR308ALS.begin();
 
-		if (!brd.sns_SHTC3.available()) {
-			brd.sns_SHTC3.process_ev(E_EVENT_TICK_TIMER);
-		}
+			step.next(STATE::SENSOR);
+		break;
 
-		// now sensor data is ready.
-		if (brd.sns_LTR308ALS.available() && brd.sns_SHTC3.available() && !b_transmit) {
-			Serial << "..finish sensor capture." << mwx::crlf
-				<< "  LTR308ALS: lumi=" << int(brd.sns_LTR308ALS.get_luminance()) << mwx::crlf
-				<< "  SHTC3    : temp=" << brd.sns_SHTC3.get_temp() << 'C' << mwx::crlf
-				<< "             humd=" << brd.sns_SHTC3.get_humid() << '%' << mwx::crlf
-				<< mwx::flush;
+		case STATE::SENSOR: // starting state
+			//  wait until sensor capture finish
+			if (!brd.sns_LTR308ALS.available()) {
+				// this will take around 50ms.
+				// note: to save battery life, perform sleeping to wait finish of sensor capture.
+				brd.sns_LTR308ALS.process_ev(E_EVENT_TICK_TIMER);
+			}
 
-			 // get new packet instance.
+			if (!brd.sns_SHTC3.available()) {
+				brd.sns_SHTC3.process_ev(E_EVENT_TICK_TIMER);
+			}
+
+			// now sensor data is ready.
+			if (brd.sns_LTR308ALS.available() && brd.sns_SHTC3.available()) {
+				sensor.u32luminance = brd.sns_LTR308ALS.get_luminance();
+				sensor.i16temp = brd.sns_SHTC3.get_temp_cent();
+				sensor.i16humid = brd.sns_SHTC3.get_humid_per_dmil();
+
+				Serial << "..finish sensor capture." << mwx::crlf
+					<< "  LTR308ALS: lumi=" << int(sensor.u32luminance) << mwx::crlf
+					<< "  SHTC3    : temp=" << div100(sensor.i16temp) << 'C' << mwx::crlf
+					<< "             humd=" << div100(sensor.i16humid) << '%' << mwx::crlf
+					;
+				Serial.flush();
+
+				step.next(STATE::TX);
+			}
+		break;
+
+		case STATE::TX:
+			step.next(STATE::GO_SLEEP); // set default next state (for error handling.)
+
+			// get new packet instance.
 			if (auto&& pkt = the_twelite.network.use<NWK_SIMPLE>().prepare_tx_packet()) {
 				// set tx packet behavior
 				pkt << tx_addr(0x00)  // 0..0xFF (LID 0:parent, FE:child w/ no id, FF:LID broad cast), 0x8XXXXXXX (long address)
@@ -92,9 +177,9 @@ void loop() {
 				// prepare packet payload
 				pack_bytes(pkt.get_payload() // set payload data objects.
 					, make_pair(FOURCHARS, 4)  // just to see packet identification, you can design in any.
-					, uint32_t(brd.sns_LTR308ALS.get_luminance()) // luminance
-					, uint16_t(brd.sns_SHTC3.get_temp())
-					, uint16_t(brd.sns_SHTC3.get_humid())
+					, uint32_t(sensor.u32luminance) // luminance
+					, uint16_t(sensor.i16temp)
+					, uint16_t(sensor.i16humid)
 				);
 
 				// do transmit
@@ -102,56 +187,54 @@ void loop() {
 				Serial << "..transmit request by id = " << int(ret.get_value()) << '.' << mwx::crlf << mwx::flush;
 
 				if (ret) {
-					u8txid = ret.get_value() & 0xFF;
-					b_transmit = true;
-				}
-				else {
-					// fail to request
-					sleepNow();
+					step.clear_flag(); // waiting for flag is set.
+					step.set_timeout(100); // set timeout
+					step.next(STATE::TX_WAIT_COMP);
 				}
 			}
-		}
-	}
+		break;
 
-	// wait to complete transmission.
-	if (b_transmit) {
-		if (the_twelite.tx_status.is_complete(u8txid)) {		
-			Serial << "..transmit complete." << mwx::crlf << mwx::flush;
+		case STATE::TX_WAIT_COMP: // wait for complete of transmit
+			if (step.is_timeout()) { // maybe fatal error.
+				the_twelite.reset_system();
+			}
+			if (step.is_flag_ready()) { // when tx is performed
+				Serial << "..transmit complete." << mwx::crlf;
+				Serial.flush();
+				step.next(STATE::GO_SLEEP);
+			}
+		break;
 
-			// now sleeping
+		case STATE::GO_SLEEP: // now sleeping
 			sleepNow();
+		break;
+
+		default: // never be here!
+			the_twelite.reset_system();
 		}
-	}
+	} while(step.b_more_loop()); // if state is changed, loop more.
 }
 
-// kick sensor capturing.
-void startSensorCapture() {
-	auto&& brd = the_twelite.board.use<PAL_AMB>();
-
-	// start sensor capture
-	brd.sns_SHTC3.begin();
-	brd.sns_LTR308ALS.begin();
-	b_transmit = false;
+// when finishing data transmit, set the flag.
+void on_tx_comp(mwx::packet_ev_tx& ev, bool_t &b_handled) {
+	step.set_flag(ev.bStatus);
 }
 
 // perform sleeping
 void sleepNow() {
-	uint32_t u32ct = 1750 + random(0,500);
-	Serial << "..sleeping " << int(u32ct) << "ms." << mwx::crlf << mwx::flush;
+	step.on_sleep(false); // reset state machine.
 
+	// randomize sleep duration.
+	uint32_t u32ct = 1750 + random(0,500);
+
+	// output message
+	Serial << "..sleeping " << int(u32ct) << "ms." << mwx::crlf;
+	Serial.flush(); // wait until all message printed.
+	
+	// do sleep.
 	the_twelite.sleep(u32ct);
 }
 
-// wakeup procedure
-void wakeup() {
-	Serial	<< mwx::crlf
-			<< "--- PAL_AMB:" << FOURCHARS << " wake up ---"
-			<< mwx::crlf
-			<< "..start sensor capture again."
-			<< mwx::crlf;
-	startSensorCapture();
-}
-
-/* Copyright (C) 2019 Mono Wireless Inc. All Rights Reserved.    *
- * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
- * AGREEMENT).                                                   */
+/* Copyright (C) 2019-2021 Mono Wireless Inc. All Rights Reserved. *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE     *
+ * AGREEMENT).                                                     */
