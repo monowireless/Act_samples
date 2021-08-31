@@ -77,7 +77,7 @@ inline bool IS_TXID_DEFFERED(uint16_t id) { return (id <= TXID_DEFERRED_MASK); }
 void setup() {
 	/*** SETUP section */
 	/// init vars or objects
-	step.setup(); // ステートマシンの初期化	
+	step.setup(); // init state machine
 	
 	/// load board and settings objects
 	auto&& brd = the_twelite.board.use BRDC (); // load board support
