@@ -13,15 +13,15 @@ const uint8_t CHANNEL = 13;
 const uint8_t PIN_BTN = 12;
 
 /*** function prototype */
-MWX_APIRET vTransmit();
+MWX_APIRET Transmit();
 
 /*** application defs */
-MWX_APIRET txreq_stat; // check tx completion status
+MWX_APIRET tx_busy; // check tx completion status
 
 /*** setup procedure (run once at cold boot) */
 void setup() {
 	/*** SETUP section */
-	txreq_stat = MWX_APIRET(false, 0);
+	tx_busy = false;
 
 	// the twelite main class
 	the_twelite
@@ -46,6 +46,11 @@ void setup() {
 /*** begin procedure (called once at boot) */
 void begin() {
 	Serial << "..begin (run once at boot)" << mwx::crlf;
+}
+
+/** on wake up */
+void wakeup() {
+	Serial << int(millis()) << ":wake up!" << mwx::crlf;
 }
 
 /*** loop procedure (called every event) */
@@ -74,13 +79,13 @@ void loop() {
 				break;
 
 			case 't':
-				if (!txreq_stat) {
-					txreq_stat = vTransmit();
-					if (txreq_stat) {
-						Serial << int(millis()) << ":tx request success! (" << int(txreq_stat.get_value()) << ')' << mwx::crlf;
+				if (!tx_busy) {
+					tx_busy = Transmit();
+					if (tx_busy) {
+						Serial << int(millis()) << ":tx request success! (" << int(tx_busy.get_value()) << ')' << mwx::crlf;
  					} else {
 						Serial << int(millis()) << ":tx request failed" << mwx::crlf;;
-					 }
+					}
 				}
 				break;
 
@@ -93,23 +98,23 @@ void loop() {
 				break;
         }
 	}
-
-	// packet
-	if (the_twelite.receiver.available()) {
-		auto&& rx = the_twelite.receiver.read();
-
-		// just dump a packet.
-		Serial << format("rx from %08x/%d", rx.get_addr_src_long(), rx.get_addr_src_lid()) << mwx::crlf;
-	}
 }
 
-void wakeup() {
-	Serial << int(millis()) << ":wake up!" << mwx::crlf;
+/** on receiving a packet. */
+void on_rx_packet(packet_rx& rx, bool_t &handled) {
+	Serial << format("rx from %08x/%d", rx.get_addr_src_long(), rx.get_addr_src_lid()) << mwx::crlf;
+}
+
+/** on completion of transmitting a packet. */
+void on_tx_comp(mwx::packet_ev_tx& ev, bool_t &b_handled) {
+	Serial 	<< int(millis()) << ":tx completed!"
+			<< format("(id=%d, stat=%d)", ev.u8CbId, ev.bStatus) << mwx::crlf;
+	tx_busy = false; // clear tx busy flag.
 }
 
 /** transmit a packet */
-MWX_APIRET vTransmit() {
-	Serial << int(millis()) << ":vTransmit()" << mwx::crlf;
+MWX_APIRET Transmit() {
+	Serial << int(millis()) << ":Transmit()" << mwx::crlf;
 
 	if (auto&& pkt = the_twelite.network.use<NWK_SIMPLE>().prepare_tx_packet()) {
 		// set tx packet behavior
@@ -126,20 +131,12 @@ MWX_APIRET vTransmit() {
 		// do transmit 
 		//return nwksmpl.transmit(pkt);
 		return pkt.transmit(); 
+	} else {
+		Serial << "TX QUEUE is FULL" << mwx::crlf;
+		return MWX_APIRET(false, 0);
 	}
-
-	return MWX_APIRET(false, 0);
 }
 
-void on_rx_packet(packet_rx& rx, bool_t &handled) {
-	Serial << format("rx from %08x/%d", rx.get_addr_src_long(), rx.get_addr_src_lid()) << mwx::crlf;
-}
-
-void on_tx_comp(mwx::packet_ev_tx& ev, bool_t &b_handled) {
-	Serial << int(millis()) << ":tx completed! (" << int(txreq_stat.get_value()) << ')' << mwx::crlf;
-	txreq_stat = MWX_APIRET(false, 0);
-}
-
-/* Copyright (C) 2019-2020 Mono Wireless Inc. All Rights Reserved.    *
+/* Copyright (C) 2019-2021 Mono Wireless Inc. All Rights Reserved.    *
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE        *
  * AGREEMENT).                                                        */
