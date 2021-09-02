@@ -113,11 +113,23 @@ void on_rx_packet(packet_rx& rx, bool_t &handled) {
 bool analyze_payload(packet_rx& rx) {
 	bool b_handled = false;
 
+#if 1
 	// expand packet payload (shall match with sent packet data structure, see pack_bytes())
-	char fourchars[5]{}; // init all elements as default (0).
+	uint8_t fourchars[4]{}; // init all elements as default (0).
 	auto&& np = expand_bytes(rx.get_payload().begin(), rx.get_payload().end()
-		, make_pair((uint8_t*)fourchars, 4)  // 4bytes of msg
+		, fourchars
     );
+#else
+	// an example to pass std::pair<char*,int>.
+	char fourchars[5]{};
+	auto&& np = expand_bytes(
+		    rx.get_payload().begin(), rx.get_payload().end()
+			, make_pair((char *)fourchars, 4)
+		);
+#endif
+
+	// if heading 4 bytes are not present, unexpected packet data.
+	if (np == nullptr) return false;
 
 	// display fourchars at first
 	Serial
@@ -125,8 +137,26 @@ bool analyze_payload(packet_rx& rx) {
 		<< format("(ID=%d/LQ=%d)", rx.get_addr_src_lid(), rx.get_lqi())
 		<< "-> ";
 
+	// Slp_Wk_and_Tx
+	if (!b_handled && !strncmp((char*)fourchars, "TXSP", 4)) {
+		b_handled = true;
+		uint32_t tick_ms;
+		uint16_t u16work_ct;
+
+		np = expand_bytes(np, rx.get_payload().end()
+			, tick_ms
+			, u16work_ct
+		);
+
+		if (np != nullptr) {
+			Serial << format("Tick=%d WkCt=%d", tick_ms, u16work_ct);
+		} else {
+			Serial << ".. error ..";
+		}
+	}
+
 	// BRD_APPTWELITE
-	if (!b_handled && !strncmp(fourchars, "BAT1", 4)) {
+	if (!b_handled && !strncmp((char*)fourchars, "BAT1", 4)) {
 		b_handled = true;
 
 		uint8_t u8DI_BM_remote = 0xff;
@@ -152,8 +182,8 @@ bool analyze_payload(packet_rx& rx) {
 
 	// AMB
 	if 	(!b_handled && 
-			(  !strncmp(fourchars, "PAB1", 4) // PAL_AMB
-			|| !strncmp(fourchars, "PAB2", 4) // PAL_AMB_usernap
+			(  !strncmp((char*)fourchars, "PAB1", 4) // PAL_AMB
+			|| !strncmp((char*)fourchars, "PAB2", 4) // PAL_AMB_usernap
 			)
 		)
 	{
@@ -181,7 +211,7 @@ bool analyze_payload(packet_rx& rx) {
 	
 	// MAG
 	if 	(!b_handled && 
-			(  !strncmp(fourchars, "PMG1", 4) // PAL_AMB
+			(  !strncmp((char*)fourchars, "PMG1", 4) // PAL_AMB
 			)
 		)
 	{
@@ -205,7 +235,7 @@ bool analyze_payload(packet_rx& rx) {
 
 	// MOT
 	if 	(!b_handled && 
-			(  !strncmp(fourchars, "PMT1", 4) // PAL_AMB
+			(  !strncmp((char*)fourchars, "PMT1", 4) // PAL_AMB
 			)
 		)
 	{
@@ -236,7 +266,7 @@ bool analyze_payload(packet_rx& rx) {
 					// Each values are splitted into 13bits and expand to int16_t for signess ((v << 3) >> 3).
 					x[i] = int16_t(((v1 >> 19) & 0x1FFF) << 3) >> 3; 
 					y[i] = int16_t(((v1 >> 6) & 0x1FFF) << 3) >> 3;
-					z[i] = int16_t(((((v1 & 0x3F) << 7) + (v2 & 0x7F)) << 3) >> 3;
+					z[i] = int16_t((((v1 & 0x3F) << 7) + (v2 & 0x7F)) << 3) >> 3;
 				} else break;
 			}
 		}
