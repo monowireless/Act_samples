@@ -21,7 +21,7 @@ const uint16_t SLEEP_DUR = 2000; // every 2000ms
 const uint16_t SLEEP_DUR_TERMOR = 200; // SLEEP_DUR +/- 200
 
 // Application control
-enum class E_STATE {
+enum class STATE {
     INIT = 0,    // INIT STATE
     WORK_JOB,    // do some job (e.g sensor capture)
     TX,          // reuest transmit
