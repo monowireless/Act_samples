@@ -1,23 +1,28 @@
 // use twelite mwx c++ template library
 #include <TWELITE>
 #include <NWK_SIMPLE>
+#include <SM_SIMPLE>
 
 #include "Common.h"
 
 /*** function prototype */
-MWX_APIRET vTransmit();
+MWX_APIRET Transmit();
 void SleepNow();
 
 /*** application defs */
-E_STATE eState;
-MWX_APIRET txreq_stat; // check tx completion status
-uint32_t u32millis_tx; // millis() at Tx 
-int dummy_work_count;  // counter for dummy work job. 
+// state machine
+SM_SIMPLE<STATE> step;
+
+// sensor capture data (dummy)
+struct {
+	uint16_t dummy_work_ct_now;
+	uint16_t dummy_work_ct_max;  // counter for dummy work job. 
+} sensor;
 
 /*** setup procedure (run once at cold boot) */
 void setup() {
 	/*** SETUP section */
-	txreq_stat = MWX_APIRET(false, 0);
+	step.setup(); // init state machine
 
 	// the twelite main class
 	the_twelite
@@ -44,82 +49,81 @@ void begin() {
 
 /*** wake up procedure */
 void wakeup() {
+	memset(&sensor, 0, sizeof(sensor));
 	Serial << crlf << int(millis()) << ":wake up!" << crlf;
-	eState = E_STATE::INIT;
 }
 
 /*** loop procedure (called every event) */
 void loop() {
-	bool loop_more; // if set, one more loop on state machine.
-
 	do {
-		loop_more = false; // set no-loop at the initial.
-
-		switch(eState) {
-			case E_STATE::INIT:
-				eState = E_STATE::WORK_JOB;
-				loop_more = true;
-
-				dummy_work_count = 100;
-			break;
-
-			case E_STATE::WORK_JOB:
-				// implement work job here (e.g. sensor capture)
-				// (the dummy job is counting down to zero every ms.)
-				if (TickTimer.available()) {
-					Serial << '.';
-					dummy_work_count--;
-					if (dummy_work_count == 0) {
-						Serial << crlf;
-						eState = E_STATE::TX;
-						loop_more = true;
-					}
-				}
-			break;
-
-			case E_STATE::TX:
-				txreq_stat = vTransmit();
-				if (txreq_stat) {
-					Serial << int(millis()) << ":tx request success! (" << int(txreq_stat.get_value()) << ')' << crlf;
-					u32millis_tx = millis();
-
-					eState = E_STATE::WAIT_TX;
-					loop_more = true;
-				} else {
-					Serial << int(millis()) << "!FATAL: tx request failed." << crlf;
-
-					eState = E_STATE::EXIT_FATAL;
-					loop_more = true;
-				}
-				break;
-
-			case E_STATE::WAIT_TX:
-				if (the_twelite.tx_status.is_complete(txreq_stat.get_value())) {
-					Serial << int(millis()) << ":tx completed! (" << int(txreq_stat.get_value()) << ')' << crlf;
-					eState = E_STATE::EXIT_NORMAL;
-				} else if (millis() - u32millis_tx > 100) {
-					Serial << int(millis()) << "!FATAL: tx timeout." << crlf;
-					eState = E_STATE::EXIT_FATAL;
-					loop_more = true;
-				}
-			break;
+		switch(step.state()) {
+		case STATE::INIT:
+			sensor.dummy_work_ct_now = 0;
+			sensor.dummy_work_ct_max = random(10,1000);
 			
-			case E_STATE::EXIT_NORMAL:
-				SleepNow();
-			break;
+			step.next(STATE::WORK_JOB);
+		break;
 
-			case E_STATE::EXIT_FATAL:
-				Serial << crlf << "!FATAL: RESET THE SYSTEM.";
-				delay(100);
-				the_twelite.reset_system();
-			break;
+		case STATE::WORK_JOB:
+			// implement work job here (e.g. sensor capture)
+			// (the dummy job is counting down to zero every ms.)
+			if (TickTimer.available()) {
+				Serial << '.';
+				sensor.dummy_work_ct_now++;
+				if (sensor.dummy_work_ct_now >= sensor.dummy_work_ct_max) {
+					Serial << crlf;
+					step.next(STATE::TX);
+				}
+			}
+		break;
+
+		case STATE::TX:
+			if (Transmit()) {
+				Serial << int(millis()) << ":tx request success!" << crlf;
+				step.set_timeout(100);
+				step.clear_flag();
+				step.next(STATE::WAIT_TX);
+			} else {
+				// normall it should not be here.
+				Serial << int(millis()) << "!FATAL: tx request failed." << crlf;
+				step.next(STATE::EXIT_FATAL);
+			}
+		break;
+
+		case STATE::WAIT_TX:
+			if (step.is_flag_ready()) {
+				Serial << int(millis()) << ":tx completed!" << crlf;
+				step.next(STATE::EXIT_NORMAL);
+			} else if (step.is_timeout()) {
+				Serial << int(millis()) << "!FATAL: tx timeout." << crlf;
+				step.next(STATE::EXIT_FATAL);
+			}
+		break;
+			
+		case STATE::EXIT_NORMAL:
+			SleepNow();
+		break;
+
+		case STATE::EXIT_FATAL:
+			Serial << crlf << "!FATAL: RESET THE SYSTEM.";
+			delay(1000); // wait a while.
+			the_twelite.reset_system();
+		break;
+
+		default: // should not be here.
+			step.next(STATE::EXIT_FATAL);
+		break;
 		}
+	} while (step.b_more_loop());
+}
 
-	} while (loop_more);
+/** transmit complete */
+void on_tx_comp(mwx::packet_ev_tx& ev, bool_t &b_handled) {
+	step.set_flag(ev.bStatus);
 }
 
 /** transmit a packet */
-MWX_APIRET vTransmit() {
+MWX_APIRET Transmit() {
 	Serial << int(millis()) << ":vTransmit()" << crlf;
 
 	if (auto&& pkt = the_twelite.network.use<NWK_SIMPLE>().prepare_tx_packet()) {
@@ -128,11 +132,31 @@ MWX_APIRET vTransmit() {
 			<< tx_retry(0x1) // set retry (0x3 send four times in total)
 			<< tx_packet_delay(0,0,2); // send packet w/ delay (send first packet with randomized delay from 0 to 0ms, repeat every 2ms)
 
+#if 1
 		// prepare packet payload
 		pack_bytes(pkt.get_payload() // set payload data objects.
 			, make_pair(FOURCC, 4) // string should be paired with length explicitly.
 			, uint32_t(millis()) // put timestamp here.
-		);
+			, uint16_t(sensor.dummy_work_ct_now) // put dummy sensor information.
+		);	
+#else
+		// same payload gerenation as above by using uint8_t*.
+		auto&& pay = pkt.get_payload(); // get buffer object.
+
+		// the following code will write data directly to internal buffer of `pay' object.
+		uint8_t *p = pay.begin(); // get the pointer of buffer head.
+		
+		S_OCTET(p, FOURCC[0]); // store byte at pointer `p' and increment the pointer.
+		S_OCTET(p, FOURCC[1]);
+		S_OCTET(p, FOURCC[2]);
+		S_OCTET(p, FOURCC[3]);
+
+		S_DWORD(p, millis()); // store uint32_t data.
+		S_WORD(p, sensor.dummy_work_ct_now); // store uint16_t data.
+
+		// Set the size of payload (redim() should be used. resize() will clear buffer.)
+		pay.redim(87+6); //p - pay.begin());
+#endif
 		
 		// do transmit 
 		//return nwksmpl.transmit(pkt);
@@ -146,10 +170,14 @@ void SleepNow() {
 	uint16_t u16dur = SLEEP_DUR;
 	u16dur = random(SLEEP_DUR - SLEEP_DUR_TERMOR, SLEEP_DUR + SLEEP_DUR_TERMOR);
 
-	Serial << int(millis()) << ":sleeping for " << int(u16dur) << "ms" << crlf << mwx::flush;
+	Serial << int(millis()) << ":sleeping for " << int(u16dur) << "ms" << crlf;
+	Serial.flush();
+
+	step.on_sleep(); // reset status of statemachine to INIT state.
+
 	the_twelite.sleep(u16dur, false);
 }
 
-/* Copyright (C) 2020 Mono Wireless Inc. All Rights Reserved.    *
- * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
- * AGREEMENT).                                                   */
+/* Copyright (C) 2020-2021 Mono Wireless Inc. All Rights Reserved. *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE     *
+ * AGREEMENT).                                                     */
