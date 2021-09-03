@@ -45,7 +45,7 @@ void sleepNow();
 void setup() {
 	/*** SETUP section */
 	/// init vars or objects
-	step.setup(); // ステートマシンの初期化	
+	step.setup(); // initialize state machine
 	
 	/// load board and settings objects
 	auto&& brd = the_twelite.board.use<PAL_AMB>(); // load board support

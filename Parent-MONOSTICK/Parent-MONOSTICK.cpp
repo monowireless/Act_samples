@@ -290,6 +290,6 @@ bool analyze_payload(packet_rx& rx) {
 	return b_handled;
 }
 
-/* Copyright (C) 2019 Mono Wireless Inc. All Rights Reserved.    *
- * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
- * AGREEMENT).                                                   */
+/* Copyright (C) 2019-2021 Mono Wireless Inc. All Rights Reserved. *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE     *
+ * AGREEMENT).                                                     */

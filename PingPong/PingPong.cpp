@@ -158,3 +158,7 @@ void on_rx_packet(packet_rx& rx, bool_t &handled) {
 			<< mwx::crlf
 			<< mwx::flush;
 }
+
+/* Copyright (C) 2019-2021 Mono Wireless Inc. All Rights Reserved. *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE     *
+ * AGREEMENT).                                                     */

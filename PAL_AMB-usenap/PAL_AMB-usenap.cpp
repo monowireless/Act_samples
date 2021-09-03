@@ -48,7 +48,7 @@ void startSensorCapture();
 void setup() {
 	/*** SETUP section */
 	/// init vars or objects
-	step.setup(); // ステートマシンの初期化	
+	step.setup(); // initialize state machine
 	
 	/// load board and settings objects
 	auto&& brd = the_twelite.board.use<PAL_AMB>(); // load board support
@@ -266,6 +266,6 @@ void napNow() {
 	the_twelite.sleep(u32ct, false, false, TWENET::SLEEP_WAKETIMER_SECONDARY);
 }
 
-/* Copyright (C) 2019 Mono Wireless Inc. All Rights Reserved.    *
- * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
- * AGREEMENT).                                                   */
+/* Copyright (C) 2019-2021 Mono Wireless Inc. All Rights Reserved. *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE     *
+ * AGREEMENT).                                                     */

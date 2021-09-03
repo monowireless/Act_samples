@@ -210,6 +210,6 @@ void on_rx_packet(packet_rx& rx, bool_t &handled) {
 	Timer4.change_duty(au16AI_remote[4] == 1023 ? 1024 : au16AI_remote[4]);
 }
 
-/* Copyright (C) 2019 Mono Wireless Inc. All Rights Reserved.    *
- * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
- * AGREEMENT).                                                   */
+/* Copyright (C) 2019-2021 Mono Wireless Inc. All Rights Reserved.  *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE      *
+ * AGREEMENT).                                                      */

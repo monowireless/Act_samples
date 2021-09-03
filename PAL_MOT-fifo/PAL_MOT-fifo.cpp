@@ -305,6 +305,7 @@ void on_tx_comp(mwx::packet_ev_tx& ev, bool_t &b_handled) {
 	if (b_all_comp) step.set_flag(ev.bStatus);
 }
 
+// perform sleep.
 void sleepNow() {
 	Serial << mwx::crlf << "..sleeping now.." << mwx::crlf;
 	Serial.flush();
@@ -315,6 +316,6 @@ void sleepNow() {
 	the_twelite.sleep(60000, false); // set longer sleep (PAL must wakeup every 60sec, just in the case)
 }
 
-/* Copyright (C) 2019 Mono Wireless Inc. All Rights Reserved.    *
- * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
- * AGREEMENT).                                                   */
+/* Copyright (C) 2019-2021 Mono Wireless Inc. All Rights Reserved. *
+ * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE     *
+ * AGREEMENT).                                                     */
