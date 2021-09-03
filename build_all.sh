@@ -1,17 +1,18 @@
 #!/bin/bash
 
-LANG=C
-MAKE=make
-
 # set ECHO=echo to show commands, so "./build_all.sh |sh" will execute.
 ECHO=echo
 # set ECHO= to execute commands in this script.
 #ECHO=
 
+LANG=C
+JOBS=0
+MAKE=make
+
 # check MWSDK_ROOT env
 if [ -z "$MWSDK_ROOT" ]; then
   export MWSDK_ROOT=`pwd`/..
-  echo "#*** no MWSDK_ROOT, assume $MWSDK_ROOT ***"
+  echo "*** no MWSDK_ROOT, assume $MWSDK_ROOT ***"
 fi
 
 # guess Physical CPU count
@@ -46,19 +47,21 @@ ck_exitvalue() {
 }
 
 do_build() {
-  if [ -f $1/Makefile ]; then
-    $ECHO echo ...building $1...
-    $ECHO cd $1
-    $ECHO rm -rfv *.bin objs_*
-    $ECHO $MAKE -j$JOBS TWELITE=BLUE DISABLE_LTO=1
-    ck_exitvalue
-    $ECHO $MAKE -j$JOBS TWELITE=RED DISABLE_LTO=1 || exit 1
-    ck_exitvalue
-    $ECHO rm -rfv objs_*
-    $ECHO cd ../..
-  fi
+  $ECHO echo ...building $1...
+  $ECHO cd $1
+  $ECHO rm -rfv *.bin objs_*
+  $ECHO $MAKE -j$JOBS TWELITE=BLUE DISABLE_LTO=1
+  ck_exitvalue
+  $ECHO $MAKE -j$JOBS TWELITE=RED DISABLE_LTO=1 || exit 1
+  ck_exitvalue
+  $ECHO rm -rfv objs_*
 }
 
-for f in [a-zA-Z]*/build; do
-  ( do_build $f )
+DIRTOP=$PWD
+[ ! -z "$ECHO" ] && $ECHO DIRTOP=$PWD
+for f in [a-zA-Z]*/build [a-zA-Z]*/[a-zA-Z]*/build; do
+  if [ -f $f/Makefile ]; then
+    do_build $f
+    $ECHO cd $DIRTOP
+  fi
 done
