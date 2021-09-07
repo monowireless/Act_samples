@@ -11,8 +11,8 @@ MAKE=make
 
 # check MWSDK_ROOT env
 if [ -z "$MWSDK_ROOT" ]; then
-  export MWSDK_ROOT=`pwd`/..
-  echo "*** no MWSDK_ROOT, assume $MWSDK_ROOT ***"
+  $ECHO export MWSDK_ROOT=$(dirname $(pwd))
+  echo "### no MWSDK_ROOT, assume $MWSDK_ROOT ###"
 fi
 
 # guess Physical CPU count
@@ -30,7 +30,7 @@ elif [ ! -z "$WINDIR" ]; then # windows msys bash
 fi
 [ -z "$JOBS" ] && JOBS=0
 [ $(expr $JOBS) -eq 0 ] && JOBS=4
-echo "#*** jobs=$JOBS ***"
+echo "### jobs=$JOBS ###"
 
 # check WSL
 if [ ! -z "$WSLENV" ]; then
@@ -52,7 +52,7 @@ do_build() {
   $ECHO rm -rfv *.bin objs_*
   $ECHO $MAKE -j$JOBS TWELITE=BLUE DISABLE_LTO=1
   ck_exitvalue
-  $ECHO $MAKE -j$JOBS TWELITE=RED DISABLE_LTO=1 || exit 1
+  $ECHO $MAKE -j$JOBS TWELITE=RED DISABLE_LTO=1
   ck_exitvalue
   $ECHO rm -rfv objs_*
 }
