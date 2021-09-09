@@ -44,7 +44,7 @@ void setup() {
 
 /*** called when waking up */
 void wakeup() {
-    Serial << crlf << "WK:";
+    Serial << crlf << "w";
 
     // If either of NORTH/SOUTH pin had an interrupt, the magnet state is changed.
     if (   the_twelite.is_wokeup_by_dio(CUE::PIN_SNS_NORTH)
@@ -82,6 +82,7 @@ void loop() {
 
 /*** function to going sleep. */
 void go_sleeping() {
+    Serial << 's'; // Serial Message
     digitalWrite(PIN_LED, PIN_STATE::HIGH);
     digitalWrite(PIN_BUZ, PIN_STATE::HIGH);
 
