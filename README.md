@@ -1,4 +1,4 @@
-﻿﻿# Act Samples for MWX library
+﻿# Act Samples for MWX library
 
 Samples codes for MWX library.
 
