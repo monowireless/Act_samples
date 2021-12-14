@@ -1,0 +1,4 @@
+[JAPANESE]
+TITLE=TWELITE ARIAボードテスト
+DESC=TWELITE ARIAの温湿度ｾﾝｻｰ,磁気ｾﾝｻｰ,LEDの動作確認を行います。ﾀｰﾐﾅﾙから[t],[s],[l]ｷｰを入力します。
+URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
