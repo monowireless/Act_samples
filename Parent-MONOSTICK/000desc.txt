@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=親機-MONOSTICK用
 DESC=無線ﾊﾟｹｯﾄを受信しｱｽｷｰ形式で出力します。Act_samplesの多くのｻﾝﾌﾟﾙに対応しています。
-URL=https://mwx.twelite.info/v/latest/act_samples/parent_monostick
+URL=https://mwx.twelite.info/act_samples/parent_monostick

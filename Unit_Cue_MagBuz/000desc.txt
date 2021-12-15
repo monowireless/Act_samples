@@ -2,4 +2,4 @@
 TITLE=CUEで磁石遠くで圧電ブザー
 DESC=CUEで磁石が遠ざかったときに圧電ブザーを鳴らします。
 圧電ブザーはVCCとSET間に接続します。
-URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
+URL=https://mwx.twelite.info/act_samples/unit_acts

@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=div100() 例
 DESC=10,100,1000による除算で商・余りを計算するdiv10(),div100(),div1000()の確認(速度/検証値)を行います。
-URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
+URL=https://mwx.twelite.info/act_samples/unit_acts

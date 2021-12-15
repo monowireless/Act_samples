@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=delayMicrosecondes() 例
 DESC=一定回数のﾙｰﾌﾟによる待ちを行います。TickTimerのｶｳﾝﾄ値と比較して精度を確認しています。
-URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
+URL=https://mwx.twelite.info/act_samples/unit_acts

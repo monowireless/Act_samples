@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=TWELITE ARIA
 DESC=TWELITE ARIAに搭載の2ｾﾝｻｰ(SHT4x/Hall IC)を動作させｾﾝｻｰ値を送信します。
-URL=https://mwx.twelite.info/v/latest/act_samples/brd_aria
+URL=https://mwx.twelite.info/act_samples/brd_aria

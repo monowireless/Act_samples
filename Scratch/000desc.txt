@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=スクラッチ
 DESC=Scratchは実験など自由に記述する目的で用意しています。act0と違い無線送受信等が実装されています。
-URL=https://mwx.twelite.info/v/latest/act_samples/scratch
+URL=https://mwx.twelite.info/act_samples/scratch

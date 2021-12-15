@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=設定(ｲﾝﾀﾗｸﾃｨﾌﾞﾓｰﾄﾞ)
 DESC=設定<STG_STD>の実装例です。
-URL=https://mwx.twelite.info/v/latest/settings/stg_std
+URL=https://mwx.twelite.info/settings/stg_std

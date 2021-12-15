@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=I2C probe
 DESC=I2Cﾃﾞﾊﾞｲｽ(1..127)の存在確認を行います。ﾃﾞﾊﾞｲｽによっては応答がない場合もあります。
-URL=https://mwx.twelite.info/v/latest/act_samples/unit_acts
+URL=https://mwx.twelite.info/act_samples/unit_acts

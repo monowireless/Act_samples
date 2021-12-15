@@ -1,4 +1,4 @@
 [JAPANESE]
 TITLE=ｽﾘｰﾌﾟ周期起動ﾃﾝﾌﾟﾚｰﾄ
 DESC=ｽﾘｰﾌﾟ→起床→無線送信→ｽﾘｰﾌﾟを行うﾃﾝﾌﾟﾚｰﾄです。loop()中をシンプルに記述するため状態遷移を用います。
-URL=https://mwx.twelite.info/v/latest/act_samples/slp_wk_and_tx
+URL=https://mwx.twelite.info/act_samples/slp_wk_and_tx
