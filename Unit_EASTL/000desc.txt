@@ -1,0 +1,4 @@
+[JAPANESE]
+TITLE=EASTLｻﾝﾌﾟﾙｺｰﾄﾞ
+DESC=EASTL ﾗｲﾌﾞﾗﾘの使用例です。
+URL=https://mwx.twelite.info/act_samples/unit_acts
