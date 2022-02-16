@@ -48,10 +48,11 @@ static unique_ptr<tlst3> uq_cnt1;
 
 template <typename T>
 void show_all(T& v, const char *msg) {
-    Serial << crlf << msg;
+    Serial << crlf << msg << '|';
     for (auto &x : v) {
-        Serial << crlf << x.first << ':';
+        Serial << x.first << ':';
         x.second(); // call the function stored in the second.
+        Serial << "  ";
     }
 }
 
@@ -94,9 +95,9 @@ void test_fixed_list() {
     // try sorting
     typedef eastl::less<tlst3::value_type>      CF_less;
     eastl::bubble_sort(v.begin(), v.end(), CF_less());
-    show_all(v, "show all entries");
+    show_all(v, "sorted");
     
     typedef eastl::greater<tlst3::value_type>   CF_greater;
     eastl::bubble_sort(v.begin(), v.end(), CF_greater());
-    show_all(v, "show all entries");
+    show_all(v, "sorted(rev)");
 }

@@ -5,26 +5,32 @@
 /* Note: The main procedure of example code of EASTL.
  *       This file is also an example of the followings:
  *        - fixed_map
- *        - fixed_vector
  *        - intrusive_hash_map
+ *        - vector_map
+ *        - fixed_vector
  *        - sort (with custom compare function object)
  */
 
-/* USE_IHM: using intrustive_hash_map is used */
-//#define USE_IHM // use intrusive_hash_map
+/* chose the type of map class */
+//#define USE_IHM // use intrusive_hash_map (faster, balanced)
+#define USE_VMAP // use vector map (slower in construt, the most memory efficient)
+//#define USE_FMAP // use fixed map (faster, worst memory use)
 
 /* includes */
 #include <TWELITE>
 
-#include <EASTL/fixed_map.h>
 #include <EASTL/fixed_vector.h>
 #include <EASTL/unique_ptr.h>
 #include <EASTL/utility.h>
 
 #include <EASTL/sort.h>
-#ifdef USE_IHM
+#if defined(USE_IHM)
 #include <EASTL/internal/intrusive_hashtable.h>
 #include <EASTL/intrusive_hash_map.h>
+#elif defined(USE_FMAP)
+#include <EASTL/fixed_map.h>
+#elif defined(USE_VMAP)
+#include <EASTL/vector_map.h>
 #endif
 
 #include <string.h>
@@ -34,8 +40,8 @@
 using namespace eastl;
 
 static const unsigned N_BUCKET_CT = 7;  // hash bucket size in intrustive_hash_map.
-static const unsigned N_ELE_SMALL = 10; // max entry number
-static const unsigned N_ELE_LARGE = 40; // just for calculating element's size in containers.
+static const unsigned N_ELE_SMALL = 16; // max entry number
+static const unsigned N_ELE_LARGE = 48; // just for calculating element's size in containers.
 
 // used for value entitiy of map.
 struct FuncDef {
@@ -56,15 +62,21 @@ public:
     const char* msg_help() { return _x->msg_help; }
     const FuncDef* data() { return _x; }
 };
+#endif
+
 
 // type definitions and key/value access functions
+#ifdef USE_IHM
 using tmap = eastl::intrusive_hash_map<char, WidFuncDef, N_BUCKET_CT>;       // more bucket_count, more spreading(efficient) and more memory usage.
 template <typename T> const FuncDef& map_value(T i) { return *(i->data()); } // access function to get value part by iterator
 tmap::key_type map_key(tmap::value_type ref) { return ref.mKey; }            // access function to get key part by iterator
-#else
-// type definitions and key/value access functions
+#elif defined(USE_FMAP)
 using tmap = fixed_map<char, const FuncDef*, N_ELE_SMALL>;
-using tmap_large = fixed_map<char, const FuncDef*, N_ELE_LARGE>;
+using tmap_large = fixed_map<char, const FuncDef*, N_ELE_LARGE>; // for size comparison
+#elif defined(USE_VMAP)
+using tmap = vector_map<char, const FuncDef*>;
+#endif
+#if defined(USE_FMAP) || defined(USE_VMAP)
 template <typename T> const FuncDef& map_value(T i) { return *(const FuncDef*)(i->second); } // access function to get value part by iterator
 tmap::key_type map_key(tmap::reference& ref) { return ref.first; }    // access function to get key part by iterator
 #endif
@@ -98,7 +110,7 @@ DEF_FuncDef(vector_multimap);
 //   Embedded compiler environment does not support global object initialization.
 static tmap v_map;
 
-// to sort keys
+// to sort keys (by label string)
 static eastl::fixed_vector<char, N_ELE_SMALL> v_key;
 struct VPCompare {
     bool operator()(char lhs, char rhs) const {
@@ -118,23 +130,31 @@ void clear_screen() {
 // show help, just listing of all map entries.
 void help() {
     clear_screen();
-    Serial      << "!!!Unit_EASTL"
-        << crlf << "!sample codes using EASTL.";
+    Serial << "!!!Unit_EASTL (sample codes)" << crlf;
     
     for (auto&&x : v_key) {
         // if there is possibility that key is not found in map container.
         auto&&e = v_map.find(x);
         if (e != v_map.end()) {
-            Serial << crlf << format(" %c : %s", x, map_value(e).msg_help);
+            Serial << crlf << format(" \e[7m%c\e[0m : %s", x, map_value(e).msg_help);
         }        
     }
 }
 
 /*** the setup procedure (called on boot) */
 void setup() {
+    check_heap(true); // init heap check funtion
+
     // construnt map table for keybind by placement new.
     mwx::pnew(v_map); // key and value map
     mwx::pnew(v_key); // key listing (intended to be sorted)
+
+#ifdef USE_VMAP
+    // reserve enough area in advance to avoid delete operation.
+    check_heap();
+    v_map.reserve(N_ELE_SMALL);
+    size_t n_vmap_heap = check_heap();
+#endif
 
     // alias to m and v
     auto& m = v_map;
@@ -142,20 +162,24 @@ void setup() {
 
     // add keybind (allows put all entries as an initializer_list argument.)
 #ifdef USE_IHM
-    #define IHM_INS(key, base) m.insert(*mwx::pnew(wid_##base, key, &fd_##base))
-    // IHM_INS('1', fd_fixed_xxx) 
+    #define MAP_INS(key, base) m.insert(*mwx::pnew(wid_##base, key, &fd_##base))
+    // MAP_INS('1', fd_fixed_xxx) 
     //   -> m.insert(*mwx::pnew(wid_fixed_xxx, '1', &fd_fixed_xxx));
-    
-    IHM_INS('t', fixed_string);
-    IHM_INS('s', fixed_set);
-    IHM_INS('l', fixed_list);
-    IHM_INS('m', fixed_slist);
-    IHM_INS('v', fixed_vector);
-    IHM_INS('L', intrusive_list);
-    IHM_INS('S', intrusive_hash_set);
-    IHM_INS('r', ring_buffer);
-    IHM_INS('V', vector_multimap);
 #else
+    #define MAP_INS(key, base) m.emplace(key, &fd_##base)
+#endif
+    
+    MAP_INS('t', fixed_string);
+    MAP_INS('s', fixed_set);
+    MAP_INS('l', fixed_list);
+    MAP_INS('m', fixed_slist);
+    MAP_INS('v', fixed_vector);
+    MAP_INS('L', intrusive_list);
+    MAP_INS('S', intrusive_hash_set);
+    MAP_INS('r', ring_buffer);
+    MAP_INS('V', vector_multimap);
+
+    /* // alternative way using initializer_list. 
     m.insert({
         { 't', &fd_fixed_string },
         { 's', &fd_fixed_set },
@@ -167,7 +191,7 @@ void setup() {
         { 'r', &fd_ring_buffer },
         { 'V', &fd_vector_multimap },
     });
-#endif
+    */
 
     // put key into v_key
     for(auto&&x : m) v.push_back(map_key(x));
@@ -183,11 +207,14 @@ void setup() {
 #ifdef USE_IHM
     Serial << crlf << crlf << "*** intrusive_hash_map is used for keybindings ***";
     Serial << crlf << format("SIZE: ele=%dby, container=%d with bucketsz=%dby", sizeof(WidFuncDef), sizeof(tmap), m.bucket_count());
-#else
+#elif defined(USE_FMAP)
     Serial << crlf << crlf << "*** fixed_map is used for keybindings ***";
     int bytes_per_entry =  (sizeof(tmap_large)-sizeof(tmap)) / (N_ELE_LARGE - N_ELE_SMALL);
     int bytes_header = sizeof(tmap) - N_ELE_SMALL*bytes_per_entry;
     Serial << crlf << format("SIZE: ele=%dby, header=%dby, %dby/entry", sizeof(char) + sizeof(FuncDef), bytes_header, bytes_per_entry);
+#elif defined(USE_VMAP)
+    Serial << crlf << crlf << "*** vector_map is used for keybindings ***";
+    Serial << crlf << format("SIZE: cnt=%d reserve(%d)=%d", sizeof(tmap), N_ELE_SMALL, n_vmap_heap);
 #endif
 }
 

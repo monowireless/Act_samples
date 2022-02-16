@@ -14,4 +14,4 @@ extern void test_ring_buffer();
 extern void test_vector_multimap();
 
 // debug func
-void check_heap(bool init=false);
+size_t check_heap(bool init=false);

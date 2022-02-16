@@ -21,8 +21,6 @@ using namespace eastl;
  */
 
 void test_vector_multimap() {
-    check_heap(true);
-
     {
         // construction : note: this will make memory leak.
         vector_multimap<char, int> m;
