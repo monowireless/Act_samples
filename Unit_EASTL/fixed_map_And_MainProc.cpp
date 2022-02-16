@@ -3,13 +3,17 @@
  * AGREEMENT).                                                   */
 
 /* Note: The main procedure of example code of EASTL.
- *       This file is also an example of eastl::fixed_map<> used as
- *       key bindings.
+ *       This file is also an example of the followings:
+ *        - fixed_map
+ *        - fixed_vector
+ *        - intrusive_hash_map
+ *        - sort (with custom compare function object)
  */
 
 /* USE_IHM: using intrustive_hash_map is used */
 #define USE_IHM // use intrusive_hash_map
 
+/* includes */
 #include <TWELITE>
 
 #include <EASTL/fixed_map.h>
@@ -19,11 +23,14 @@
 
 #include <EASTL/sort.h>
 #ifdef USE_IHM
+#include <EASTL/internal/intrusive_hashtable.h>
 #include <EASTL/intrusive_hash_map.h>
 #endif
 
+#include <string.h>
 #include "common.hpp"
 
+/* namespace */
 using namespace eastl;
 
 static const unsigned N_BUCKET_CT = 7;  // hash bucket size in intrustive_hash_map.
@@ -41,15 +48,10 @@ struct FuncDef {
 //   this class will embed key and value information.
 class WidFuncDef : public intrusive_hash_node_key<char>
 {
-    const FuncDef *_x;
+    using SUP = intrusive_hash_node_key; // alias
+    const FuncDef *_x; // function and label
 public:
-    WidFuncDef(char key = 0, const FuncDef *x = nullptr) : _x(x) {
-        mKey = key;
-        if (key) {
-            Serial << format("<C:k=%c,v=%s>", key, x->msg_help ? x->msg_help : "");
-            Serial.flush();
-        }
-    }
+    WidFuncDef(char key = 0, const FuncDef *x = nullptr) : _x(x)  { SUP::mKey = key; } // not sure why intrusive_hash_node_key<char>::mKey(key) causes an error.
     void func() { _x->func(); }
     const char* msg_help() { return _x->msg_help; }
     const FuncDef* data() { return _x; }
@@ -63,7 +65,7 @@ tmap::key_type map_key(tmap::value_type ref) { return ref.mKey; }            // 
 // type definitions and key/value access functions
 using tmap = fixed_map<char, const FuncDef*, N_ELE_SMALL>;
 using tmap_large = fixed_map<char, const FuncDef*, N_ELE_LARGE>;
-const FuncDef& map_value(tmap::iterator& i) { return *(const FuncDef*)(i->second); } // access function to get value part by iterator
+template <typename T> const FuncDef& map_value(T i) { return *(const FuncDef*)(i->second); } // access function to get value part by iterator
 tmap::key_type map_key(tmap::reference& ref) { return ref.first; }    // access function to get key part by iterator
 #endif
 
@@ -96,6 +98,13 @@ static tmap v_map;
 
 // to sort keys
 static eastl::fixed_vector<char, N_ELE_SMALL> v_key;
+struct VPCompare {
+    bool operator()(char lhs, char rhs) const {
+        const char *str_l = map_value(v_map.find(lhs)).msg_help;
+        const char *str_r = map_value(v_map.find(rhs)).msg_help;
+        return strcmp(str_l, str_r) < 0;
+    }
+};
 
 // clear serial terminal
 void clear_screen() {
@@ -135,28 +144,31 @@ void setup() {
     //    -> mwx::pnew(wid_fixed_string, '1', &fd_fixed_string);
     //       m.insert(wid_fixed_string);
     
-    IHM_INS('1', fixed_string);
-    IHM_INS('2', fixed_set);
-    IHM_INS('3', fixed_list);
-    IHM_INS('4', fixed_slist);
-    IHM_INS('5', fixed_vector);
-    IHM_INS('6', intrusive_list);
-    IHM_INS('7', intrusive_hash_set);
+    IHM_INS('t', fixed_string);
+    IHM_INS('s', fixed_set);
+    IHM_INS('l', fixed_list);
+    IHM_INS('m', fixed_slist);
+    IHM_INS('v', fixed_vector);
+    IHM_INS('L', intrusive_list);
+    IHM_INS('S', intrusive_hash_set);
 #else
     m.insert({
-        { '1', &fd_fixed_string },
-        { '2', &fd_fixed_set },
-        { '3', &fd_fixed_list },
-        { '4', &fd_fixed_slist },
-        { '5', &fd_fixed_vector },
-        { '6', &fd_intrusive_list },
-        { '7', &fd_intrusive_hash_set },
+        { 't', &fd_fixed_string },
+        { 's', &fd_fixed_set },
+        { 'l', &fd_fixed_list },
+        { 'm', &fd_fixed_slist },
+        { 'v', &fd_fixed_vector },
+        { 'L', &fd_intrusive_list },
+        { 'S', &fd_intrusive_hash_set },
     });
 #endif
 
     // put key into v_key
     for(auto&&x : m) v.push_back(map_key(x));
-    sort(v.begin(), v.end(), eastl::greater<char>()); // sort in reverse order (as a code example.)
+    sort(v.begin(), v.end()
+                , VPCompare()               // sort by label string
+                // , eastl::greater<char>() // sort by key in reverse order
+        ); 
 
     // show help
     help();
