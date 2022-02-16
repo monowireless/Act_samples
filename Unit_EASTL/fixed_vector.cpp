@@ -2,10 +2,19 @@
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */
 
+/* Note: this example refers the followings:
+ *  - eastl::fixed_vector          : vector with fixed memory
+ *  - eastl::sort                  : sort
+ *  - eastl::less, eastl::greater  : compare func obj
+ *  - eastl::bin_search_i          : binary search by iterator
+ */
+
 #include <TWELITE>
 #include <EASTL/fixed_vector.h>
 #include <EASTL/unique_ptr.h>
+
 #include <EASTL/sort.h>
+#include <EASTL/algorithm.h>
 
 static const unsigned N_ELE_SMALL = 4;
 static const unsigned N_ELE_LARGE = 40;
@@ -66,8 +75,25 @@ void test_fixed_vector() {
     eastl::sort(v.begin(), v.end(), CF_less());
     list_vect(v, "sort"); // show the vector.
 
+    {
+        int n = 4;
+        auto i1 = eastl::binary_search_i(v.begin(), v.end(), n, CF_less());
+        if (i1 != v.end()) {
+            Serial << crlf << format("bin_search: found %d at index %d", n, i1 - v.begin());
+        }
+    }
+
     typedef eastl::greater<tvct4::value_type>   CF_greater;
     eastl::sort(v.begin(), v.end(), CF_greater());
     list_vect(v, "sort reverse"); // show the vector.
+    
+    {
+        int n = 4;
+        auto i1 = eastl::binary_search_i(v.begin(), v.end(), n, CF_greater());
+        if (i1 != v.end()) {
+            Serial << crlf << format("bin_search: found %d at index %d", n, i1 - v.begin());
+        }
+    }
+
 #endif
 }

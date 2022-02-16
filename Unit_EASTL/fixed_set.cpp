@@ -2,14 +2,14 @@
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */
 
+/* fixed_set is not recommended because of big usage in memory */
+/* fixed_set は使用メモリ量が多いため使用は推奨しない */
+
 #include <TWELITE>
 #include <EASTL/fixed_set.h>
 #include <EASTL/unique_ptr.h>
 #include <EASTL/utility.h>
 #include <EASTL/sort.h>
-
-/* fixed_set is not recommended because of big usage in memory */
-/* fixed_set は使用メモリ量が多いため使用は推奨しない */
 
 using namespace eastl;
 

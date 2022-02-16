@@ -91,6 +91,7 @@ DEF_FuncDef(fixed_slist);
 DEF_FuncDef(fixed_vector);
 DEF_FuncDef(intrusive_list);
 DEF_FuncDef(intrusive_hash_set);
+DEF_FuncDef(ring_buffer);
 
 // unique_ptr: for replacement of global definition.
 //   Embedded compiler environment does not support global object initialization.
@@ -151,6 +152,7 @@ void setup() {
     IHM_INS('v', fixed_vector);
     IHM_INS('L', intrusive_list);
     IHM_INS('S', intrusive_hash_set);
+    IHM_INS('r', ring_buffer);
 #else
     m.insert({
         { 't', &fd_fixed_string },
@@ -160,6 +162,7 @@ void setup() {
         { 'v', &fd_fixed_vector },
         { 'L', &fd_intrusive_list },
         { 'S', &fd_intrusive_hash_set },
+        { 'r', &fd_ring_buffer },
     });
 #endif
 

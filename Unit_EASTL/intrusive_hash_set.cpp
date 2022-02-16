@@ -30,18 +30,16 @@ struct SWHash
 
 template class eastl::intrusive_hash_set<SetWidget, 37, SWHash>;
 
+// necessary for hash set.
 inline bool operator==(const SetWidget& a, const SetWidget& b)
-    { return a.mX == b.mX; }
-    
-//inline bool operator<(const SetWidget& a, const SetWidget& b)
-//    { return a.mX < b.mX; }
-    
-//inline int operator-(const SetWidget& a, const SetWidget& b)
-//    { return a.mX - b.mX; }
+   { return a.mX == b.mX; }
     
 void test_intrusive_hash_set() {
-    const size_t kBucketCount = 37;
+    const size_t kBucketCount = 7; // should be primer number
 	typedef intrusive_hash_set<SetWidget, kBucketCount, SWHash> IHM_SW;
+
+    // the container size (cnt=...) will vary by kBucketCount (more bucket, more memory, less collision in hash)
+    Serial << crlf << format("SIZE: ele=%d cnt=%d(buckt:%d)", sizeof(SetWidget), sizeof(IHM_SW), kBucketCount);
 
     SetWidget nodeA(5);
     SetWidget nodeB(3);

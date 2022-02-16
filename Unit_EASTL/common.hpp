@@ -10,3 +10,4 @@ extern void test_fixed_slist();
 extern void test_fixed_vector();
 extern void test_intrusive_list();
 extern void test_intrusive_hash_set();
+extern void test_ring_buffer();
