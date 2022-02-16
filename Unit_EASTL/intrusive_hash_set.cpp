@@ -2,6 +2,11 @@
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */
 
+/* Note: this example refers the followings:
+ *  - eastl::intrusive_hash_set     : set container (intrustive hash)
+ *  - eastl::intrusive_hash_node    : base class holding link information to form list.
+ */
+
 #include <TWELITE>
 #include <EASTL/internal/intrusive_hashtable.h>
 #include <EASTL/intrusive_hash_set.h>

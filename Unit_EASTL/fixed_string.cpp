@@ -2,6 +2,12 @@
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */
 
+/* Note: this example refers the followings:
+ *  - eastl::fixed_string          : string class on fixed memory.
+ *  - eastl::basic_string          : string class with dynamic allocation (more flexible, can use with substring)
+ *  - eastl::fixed_substring       : substring class
+ */
+
 #include <TWELITE>
 #include <EASTL/fixed_string.h>
 #include <EASTL/fixed_substring.h>

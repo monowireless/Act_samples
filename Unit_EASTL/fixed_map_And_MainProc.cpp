@@ -11,7 +11,7 @@
  */
 
 /* USE_IHM: using intrustive_hash_map is used */
-#define USE_IHM // use intrusive_hash_map
+//#define USE_IHM // use intrusive_hash_map
 
 /* includes */
 #include <TWELITE>
@@ -92,6 +92,7 @@ DEF_FuncDef(fixed_vector);
 DEF_FuncDef(intrusive_list);
 DEF_FuncDef(intrusive_hash_set);
 DEF_FuncDef(ring_buffer);
+DEF_FuncDef(vector_multimap);
 
 // unique_ptr: for replacement of global definition.
 //   Embedded compiler environment does not support global object initialization.
@@ -142,8 +143,8 @@ void setup() {
     // add keybind (allows put all entries as an initializer_list argument.)
 #ifdef USE_IHM
     #define IHM_INS(key, base) m.insert(*mwx::pnew(wid_##base, key, &fd_##base))
-    //    -> mwx::pnew(wid_fixed_string, '1', &fd_fixed_string);
-    //       m.insert(wid_fixed_string);
+    // IHM_INS('1', fd_fixed_xxx) 
+    //   -> m.insert(*mwx::pnew(wid_fixed_xxx, '1', &fd_fixed_xxx));
     
     IHM_INS('t', fixed_string);
     IHM_INS('s', fixed_set);
@@ -153,6 +154,7 @@ void setup() {
     IHM_INS('L', intrusive_list);
     IHM_INS('S', intrusive_hash_set);
     IHM_INS('r', ring_buffer);
+    IHM_INS('V', vector_multimap);
 #else
     m.insert({
         { 't', &fd_fixed_string },
@@ -163,6 +165,7 @@ void setup() {
         { 'L', &fd_intrusive_list },
         { 'S', &fd_intrusive_hash_set },
         { 'r', &fd_ring_buffer },
+        { 'V', &fd_vector_multimap },
     });
 #endif
 

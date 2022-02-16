@@ -11,3 +11,7 @@ extern void test_fixed_vector();
 extern void test_intrusive_list();
 extern void test_intrusive_hash_set();
 extern void test_ring_buffer();
+extern void test_vector_multimap();
+
+// debug func
+void check_heap(bool init=false);

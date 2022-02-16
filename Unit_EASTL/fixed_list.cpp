@@ -2,6 +2,11 @@
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */
 
+/* Note: this example refers the followings:
+ *  - eastl::fixed_list        : bi-directional link list
+ *  - eastl::pair              : pair two types
+ */
+
 #include <TWELITE>
 #include <EASTL/fixed_list.h>
 #include <EASTL/unique_ptr.h>

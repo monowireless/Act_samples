@@ -2,11 +2,19 @@
  * Released under MW-SLA-*J,*E (MONO WIRELESS SOFTWARE LICENSE   *
  * AGREEMENT).                                                   */
 
+/* Note: this example refers the followings:
+ *  - eastl::intrusive_list         : intrusive list
+ *  - eastl::intrusive_list_node    : base class holding link information to form list.
+ *  - sorting                       : the class has sort capability.
+ */
+
 /**
  * intrusive コンテナの特徴：
  * 
  * - コンテナ要素にリンクを維持するためのポインタを保持します。
- *   eastl::intrusive_list_node を継承します。
+ *   リストの場合は eastl::intrusive_list_node を継承します。
+ *   コンテナ構造特有のリンク情報をデータ要素に保持するため、
+ *   事実上コンテナ専用のデータ構造となります。
  * - 通常のコンテナではオブジェクトのメモリ管理を行いますが、
  *   intrusive コンテナには、各要素そのものが格納されたように見えます。
  *   実際にはリンクを維持するポインタの操作によりコンテナに格納された
@@ -66,6 +74,9 @@ void print_list(tilist& l, const char*msg="") {
     }
 }
 
+
+// global object declaration
+// note: they are just zero cleared, but not calling construtor.
 IntNode nodeA;
 IntNode nodeB;
 IntNode nodeC;
@@ -73,6 +84,7 @@ IntNode nodeD;
 IntNode nodeE;
 
 tilist intList;
+
 void test_intrusive_list() {
     Serial << format("SIZE: tilist=%d IntNode=%d", sizeof(tilist), sizeof(IntNode));
 
