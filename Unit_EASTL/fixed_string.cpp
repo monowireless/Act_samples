@@ -42,6 +42,18 @@ void test_fixed_string() {
     fs0.clear();
     print_str("fs0.clear()", fs0);
     
+    // sprintf, not appending
+    fs0.sprintf("hello%d", 123);
+    print_str("sprintf()", fs0);
+
+    // when appending, another string object should be used.
+    {
+    	tstr128 fs1;
+		fs0 += fs1.sprintf(":%x", 123);
+		  // must not like `fs0.sprintf("%s:%x", fs0.c_str(), 123)', this may work, but fairly unsafe way.
+		print_str("append", fs0);
+    }
+
     // new the obj (reserved at heap)
     fs1 = new tstr128("hello");
     print_str("new fs1", *fs1);
