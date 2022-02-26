@@ -12,8 +12,8 @@
  */
 
 /* chose the type of map class */
-//#define USE_IHM // use intrusive_hash_map (faster, balanced)
-#define USE_VMAP // use vector map (slower in construt, the most memory efficient)
+#define USE_IHM // use intrusive_hash_map (faster, balanced)
+//#define USE_VMAP // use vector map (slower in construt, the most memory efficient)
 //#define USE_FMAP // use fixed map (faster, worst memory use)
 
 /* includes */
@@ -105,6 +105,7 @@ DEF_FuncDef(intrusive_list);
 DEF_FuncDef(intrusive_hash_set);
 DEF_FuncDef(ring_buffer);
 DEF_FuncDef(vector_multimap);
+DEF_FuncDef(instrusive_hash_mmap);
 
 // unique_ptr: for replacement of global definition.
 //   Embedded compiler environment does not support global object initialization.
@@ -178,6 +179,7 @@ void setup() {
     MAP_INS('S', intrusive_hash_set);
     MAP_INS('r', ring_buffer);
     MAP_INS('V', vector_multimap);
+    MAP_INS('M', instrusive_hash_mmap);
 
     /* // alternative way using initializer_list. 
     m.insert({

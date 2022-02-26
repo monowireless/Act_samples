@@ -12,6 +12,7 @@ extern void test_intrusive_list();
 extern void test_intrusive_hash_set();
 extern void test_ring_buffer();
 extern void test_vector_multimap();
+extern void test_instrusive_hash_mmap();
 
 // debug func
 size_t check_heap(bool init=false);
