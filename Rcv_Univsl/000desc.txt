@@ -1,0 +1,4 @@
+[JAPANESE]
+TITLE=Rcv_Univsl-Actによる汎用受信
+DESC=App_TweliteやPALのﾊﾟｹｯﾄを受信するサンプルコード
+URL=https://mwx.twelite.info/act_samples/
