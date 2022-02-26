@@ -11,7 +11,7 @@ bool pkt_actsamples::analyze(mwx::packet_rx& rx, bool &b_handled) {
 	b_handled = false;
 
 	// clean data area
-	memset(&data, 0, sizeof(data));
+	mwx::pnew(data);
 
 	data.u32addr_src = rx.get_addr_src_long();
 	data.u8addr_src = rx.get_addr_src_lid();

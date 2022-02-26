@@ -218,7 +218,7 @@ bool pkt_pal::b_pal_packet_analyze_body(packet_rx& rx) {
 	const uint8_t *p_end = rx.get_payload().end();
 
 	// clean data area
-	memset(&data, 0, sizeof(data));
+	mwx::pnew(data);
 	
 	// this must be via network layer
 	if (!rx.get_psRxDataApp()->bNwkPkt) return false;

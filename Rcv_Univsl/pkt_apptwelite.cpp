@@ -23,7 +23,7 @@ bool pkt_apptwelite::analyze(mwx::packet_rx& rx, bool& b_handled) {
 	if (!identify(rx)) return false;
 
 	// clean data area
-	memset(&data, 0, sizeof(data));
+	mwx::pnew(data);
 
 	// analyze payload.
 	(void)G_BYTE(p); // App Identifier
