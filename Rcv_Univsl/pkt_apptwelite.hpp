@@ -5,11 +5,16 @@
 #ifndef SOURCE_PKT_APPTWELITE_HPP_
 #define SOURCE_PKT_APPTWELITE_HPP_
 
+
 #include <TWELITE>
+
+#include <EASTL/fixed_vector.h>
+
 #include "dup_checker.hpp"
 
 #include "common.h"
 #include "pkt_common.hpp"
+
 
 class pkt_apptwelite {
 	// 15entries MAX
@@ -26,11 +31,19 @@ public:
 		//   0 1 2 3 4 5 6 7 8 9 a b c d e f 0 1 2 3 4 5 6 -
 		//  150175810000380026C9000C04220000FFFFFFFFFF
 		//  IdPt
-		if (u16len == 21
-			&& rx.get_cmd() == TYPE_X81
-			&& p[0] == g_u8_appidentifier
-			&& p[1] == PROTOCOL_VERSION // protocol version (0x01)
-			&& (p[3] & 0x80) == 0x80 	 // SID: MSB must be set
+		if (rx.get_cmd() == TYPE_X81		// 0x81 command (sensor data information)
+			&& u16len == 21					// 
+			&& p[0] == g_u8_appidentifier	// generated from AppID
+			&& p[1] == PROTOCOL_VERSION 	// protocol version (0x01)
+			&& (p[3] & 0x80) == 0x80 	 	// SID: MSB must be set
+			) {
+			return true;
+		} else 
+		if (rx.get_cmd() == TYPE_MSG		// Message
+			&& p[0] == g_u8_appidentifier	// generated from AppID
+			&& p[1] == PROTOCOL_VERSION		// protocol version (0x01)
+			&& (p[3] & 0x80) == 0x80		// SID: MSB must be set
+			&& u16len == p[16] + 17     	// packet data length
 			) {
 			return true;
 		}
@@ -43,6 +56,7 @@ public:
 
 public:
 	static const uint8_t PROTOCOL_VERSION = 0x01;
+	static const uint8_t TYPE_MSG = TOCONET_PACKET_CMD_APP_DATA;
 	static const uint8_t TYPE_X81 = TOCONET_PACKET_CMD_APP_USER + 0;
 	static const uint8_t TYPE_X80 = TOCONET_PACKET_CMD_APP_USER + 1;
 
@@ -134,6 +148,12 @@ public:
 		uint8_t Adc_active_mask;
 	};
 
+	struct DataTwelite_Msg {
+		uint8_t u8dst_addr;
+		uint8_t u8message_id;
+		uint8_t payload[80];
+	};
+
 	struct _data_apptwelite : public PktDataCommon {
 		/**
 		 * sequence counter
@@ -153,7 +173,15 @@ public:
 
 		union {
 			DataTwelite_x81 x81;
+			DataTwelite_Msg msg;
 		};
+		
+		/**
+		 * vector to attach msg.payload[].
+		 * note: placing class object as union member is confusing, therefore
+		 *       attaching vector is used instead.
+		 */
+		mwx::smplbuf_u8_attach payload_msg;
 	} data;
 };
 

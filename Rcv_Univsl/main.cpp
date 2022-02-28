@@ -46,6 +46,7 @@ void setup() {
 	nwk_ly
 		<< NWK_LAYERED::network_role(NWK_LAYERED::ROLE_PARENT) // set a role as parent.
 		;
+
 	nwk_sm
 		<< NWK_SIMPLE::logical_id(0)             // as a parent device.
 		<< NWK_SIMPLE::receive_nwkless_pkt(true) // receive network less packet (e.g. App_Twelite)

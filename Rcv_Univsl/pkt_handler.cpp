@@ -11,7 +11,7 @@ pkt_handler_unknown g_pkt_unknown;
 
 void pkt_handler_pal::disp_detail(packet_rx& rx) {
 	// Board type
-	Serial << format(":%x", pkt.base_info().u8pkt);
+	Serial << format(":BrdID=%x", pkt.base_info().u8pkt);
 
 	// for ACCEL info.
 	if (pkt.size_accel() > 0) {
@@ -73,20 +73,47 @@ void pkt_handler_actsamples::disp_detail(packet_rx& rx) {
 }
 
 void pkt_handler_apptwelite::disp_detail(packet_rx& rx) {
-	Serial
-		<< (pkt.data.b_lowlatency_tx ? '!' : ':')
-		<< format("DI=%c%c%c%c"
-				, pkt.data.x81.DI_active_mask & 0b0001 ? (pkt.data.x81.DI1 ? '1' : '0') : '-'
-				, pkt.data.x81.DI_active_mask & 0b0010 ? (pkt.data.x81.DI2 ? '1' : '0') : '-'
-				, pkt.data.x81.DI_active_mask & 0b0100 ? (pkt.data.x81.DI3 ? '1' : '0') : '-'
-				, pkt.data.x81.DI_active_mask & 0b1000 ? (pkt.data.x81.DI4 ? '1' : '0') : '-'
-				)
-		<< format(" AD=%04d:%04d:%04d:%04d"
-				, pkt.data.x81.Adc_active_mask & 0b0001 ? pkt.data.x81.u16Adc1 : 9999
-				, pkt.data.x81.Adc_active_mask & 0b0010 ? pkt.data.x81.u16Adc2 : 9999
-				, pkt.data.x81.Adc_active_mask & 0b0100 ? pkt.data.x81.u16Adc3 : 9999
-				, pkt.data.x81.Adc_active_mask & 0b1000 ? pkt.data.x81.u16Adc4 : 9999
-				)
-		<< format(" TS=%d", pkt.data.u16timestamp)
-		;
+	switch (pkt.data.u8type) {
+		case pkt_apptwelite::TYPE_X81:
+			if (1) {
+				auto &x = pkt.data.x81;
+				
+				Serial
+					<< (pkt.data.b_lowlatency_tx ? '!' : ':')
+					<< format("DI=%c%c%c%c"
+							, x.DI_active_mask & 0b0001 ? (x.DI1 ? '1' : '0') : '-'
+							, x.DI_active_mask & 0b0010 ? (x.DI2 ? '1' : '0') : '-'
+							, x.DI_active_mask & 0b0100 ? (x.DI3 ? '1' : '0') : '-'
+							, x.DI_active_mask & 0b1000 ? (x.DI4 ? '1' : '0') : '-'
+							)
+					<< format(" AD=%04d:%04d:%04d:%04d"
+							, x.Adc_active_mask & 0b0001 ? x.u16Adc1 : 9999
+							, x.Adc_active_mask & 0b0010 ? x.u16Adc2 : 9999
+							, x.Adc_active_mask & 0b0100 ? x.u16Adc3 : 9999
+							, x.Adc_active_mask & 0b1000 ? x.u16Adc4 : 9999
+							)
+					<< format(" TS=%d", pkt.data.u16timestamp)
+					;
+			}
+		break;
+
+		case pkt_apptwelite::TYPE_MSG:
+		{
+			if (pkt.data.payload_msg.size() > 2) {
+				uint8_t *p = pkt.data.payload_msg.begin(), *p_end = pkt.data.payload_msg.end();
+				auto &x = pkt.data.msg;
+			
+				Serial << format(":MSG(Src=%02X,Cmd=%02X,", x.u8dst_addr, x.u8message_id); 
+				for(; p != p_end; p++) Serial << format("%02x", *p);
+				Serial << ')';
+			} else {
+				Serial << format(":<err>");
+			}
+		}
+		break;
+
+		default:
+			Serial << ":<unsupported>";
+			break;	
+	}
 }
