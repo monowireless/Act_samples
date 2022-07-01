@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=設定(ｲﾝﾀﾗｸﾃｨﾌﾞﾓｰﾄﾞ)
-DESC=設定<STG_STD>の実装例です。
+TITLE=インタラクティブモードによる設定
+DESC=インタラクティブモードによるパラメータ設定を行うサンプルです。
+URL=https://mwx.twelite.info/settings/stg_std
+[ENGLISH]
+TITLE=Settings with the interactive mode.
+DESC=Act sample with parameter settings for interactive mode.
 URL=https://mwx.twelite.info/settings/stg_std

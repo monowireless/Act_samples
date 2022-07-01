@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=開閉ｾﾝｻｰPAL
-DESC=開閉ｾﾝｻｰPAL(MAG)でｾﾝｻｰ値が変化に無線送信します。
+TITLE=開閉センサーPAL
+DESC=開閉センサーPALに搭載されたホールICから取得した値を送信するサンプルです。
+URL=https://mwx.twelite.info/act_samples/pal_mag
+[ENGLISH]
+TITLE=MAG PAL
+DESC=Act sample using a hall sensor on the MAG PAL.
 URL=https://mwx.twelite.info/act_samples/pal_mag

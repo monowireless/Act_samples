@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=delayMicrosecondes() 例
-DESC=一定回数のﾙｰﾌﾟによる待ちを行います。TickTimerのｶｳﾝﾄ値と比較して精度を確認しています。
+TITLE=delayMicroseconds()
+DESC=delayMicroseconds()を使ったカウント値とTickTimerのカウント値を比較して精度を確認するサンプルです。
+URL=https://mwx.twelite.info/act_samples/unit_acts
+[ENGLISH]
+TITLE=delayMicroseconds()
+DESC=Act sample for checking accuracy for delayMicroseconds() and Timers.
 URL=https://mwx.twelite.info/act_samples/unit_acts

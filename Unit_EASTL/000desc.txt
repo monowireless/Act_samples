@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=EASTLｻﾝﾌﾟﾙｺｰﾄﾞ
-DESC=EASTL ﾗｲﾌﾞﾗﾘの使用例です。
+TITLE=EASTL
+DESC=EASTLライブラリを使用するサンプルです。
+URL=https://mwx.twelite.info/act_samples/unit_acts
+[ENGLISH]
+TITLE=EASTL
+DESC=Act sample using the EASTL library.
 URL=https://mwx.twelite.info/act_samples/unit_acts

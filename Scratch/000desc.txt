@@ -1,4 +1,10 @@
 [JAPANESE]
-TITLE=スクラッチ
-DESC=Scratchは実験など自由に記述する目的で用意しています。act0と違い無線送受信等が実装されています。
+TITLE=Actのテンプレート（スクラッチ）
+DESC=act0とは異なり、無線パケットの送受信処理を実装したテンプレートです。
+新しく Act を記述するのに利用してください。
+URL=https://mwx.twelite.info/act_samples/scratch
+[ENGLISH]
+TITLE=Act scratch template
+DESC=Act template with packet sending/receiving procedures.
+Useful for creating a new Act.
 URL=https://mwx.twelite.info/act_samples/scratch

@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=Rcv_Univsl-Actによる汎用受信
-DESC=App_TweliteやPALのﾊﾟｹｯﾄを受信するサンプルコード
+TITLE=汎用パケット受信サンプル
+DESC=標準アプリやパルアプリなどからパケットを受信するサンプルです。
+URL=https://mwx.twelite.info/act_samples/
+[ENGLISH]
+TITLE=Universal packet receiving sample
+DESC=Act sample receives packets from App_Twelite or App_PAL, etc.
 URL=https://mwx.twelite.info/act_samples/

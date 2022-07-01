@@ -1,4 +1,10 @@
 [JAPANESE]
-TITLE=環境ｾﾝｻｰPAL-消費電力節約版
-DESC=環境ｾﾝｻｰPALに搭載の2ｾﾝｻｰ(SHTC/LTR308ALS)を動作させｾﾝｻｰ値を送信します。ｾﾝｻｰ完了待ちにｽﾘｰﾌﾟを用いより低い消費電力とします。
-URL=https://mwx.twelite.info/act_samples/pal_amb-usenap
+TITLE=環境センサーPAL — 省電力版
+DESC=環境センサーPALに搭載された2種のセンサ(SHTC/LTR308ALS)から取得した値を送信するサンプルです。
+センサ処理終了後にスリープします。
+URL=https://mwx.twelite.info/api-reference/behavior/pal_amb-behavior
+[ENGLISH]
+TITLE=AMB PAL — Power-saving version
+DESC=Act sample using two sensors on the TWELITE AMB PAL (SHTC/LTR308ALS).
+Sleep after the sensor processing is completed.
+URL=https://mwx.twelite.info/act_samples/pal_amb

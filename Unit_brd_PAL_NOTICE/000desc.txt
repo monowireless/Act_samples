@@ -1,4 +1,10 @@
 [JAPANESE]
-TITLE=NOTICE PALのLED制御例
-DESC=NOTICE PALのLEDを制御します。シリアル入力キーに応じて点灯状態を変化させます。
+TITLE=通知パルのLED制御
+DESC=通知パルのLEDを制御するサンプルです。
+入力キーに応じて点灯状態を変化させます。
+URL=https://mwx.twelite.info/act_samples/unit_acts
+[ENGLISH]
+TITLE=Control LEDs on the NOTICE PAL
+DESC=Act sample that controls LEDs on the NOTICE PAL.
+Change the lighting by key inputs.
 URL=https://mwx.twelite.info/act_samples/unit_acts

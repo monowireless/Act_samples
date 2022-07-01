@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=EEPROMの利用
-DESC=TWELITE無線ﾏｲｺﾝ内蔵EEPROMを利用します。
+TITLE=EEPROM
+DESC=内蔵EEPROMを使用するサンプルです。
+URL=https://mwx.twelite.info/act_samples/unit_acts
+[ENGLISH]
+TITLE=EEPROM
+DESC=Act sample using the internal EEPROM module.
 URL=https://mwx.twelite.info/act_samples/unit_acts

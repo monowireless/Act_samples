@@ -1,10 +1,10 @@
 [JAPANESE]
 TITLE=Actのテンプレート
-DESC=中身が何もない setup(), loop() のみのファイルです。
+DESC=中身が何もない setup(), loop() を実装したテンプレートです。
 新しく Act を記述するのに利用してください。
 URL=https://mono-wireless.com/jp/products/act/index.html
 [ENGLISH]
 TITLE=Act empty template
-DESC=This act file only contains empty setup() and loop(),
-which is intended to write a new Act. 
+DESC=Act template with empty setup() and loop() functions.
+Useful for creating a new Act.
 URL=https://mono-wireless.com/jp/products/act/index.html

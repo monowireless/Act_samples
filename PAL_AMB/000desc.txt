@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=環境ｾﾝｻｰPAL-ｼﾝﾌﾟﾙ版
-DESC=環境ｾﾝｻｰPALに搭載の2ｾﾝｻｰ(SHTC/LTR308ALS)を動作させｾﾝｻｰ値を送信します。
+TITLE=環境センサーPAL — シンプル版
+DESC=環境センサーPALに搭載された2種のセンサ(SHTC/LTR308ALS)から取得した値を送信するサンプルです。
+URL=https://mwx.twelite.info/act_samples/pal_amb
+[ENGLISH]
+TITLE=AMB PAL — Simplified version
+DESC=Act sample using two sensors on the TWELITE AMB PAL (SHTC/LTR308ALS).
 URL=https://mwx.twelite.info/act_samples/pal_amb

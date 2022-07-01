@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=ｽﾘｰﾌﾟ周期起動ﾃﾝﾌﾟﾚｰﾄ
-DESC=ｽﾘｰﾌﾟ→起床→無線送信→ｽﾘｰﾌﾟを行うﾃﾝﾌﾟﾚｰﾄです。loop()中をシンプルに記述するため状態遷移を用います。
+TITLE=Actのテンプレート（スリープ周期実行）
+DESC=スリープ→起床→無線送信→スリープを繰り返す処理を実装したテンプレートです。
+URL=https://mwx.twelite.info/act_samples/slp_wk_and_tx
+[ENGLISH]
+TITLE=Act sleeping template
+DESC=Act template that sleeps and wake up periodically.
 URL=https://mwx.twelite.info/act_samples/slp_wk_and_tx

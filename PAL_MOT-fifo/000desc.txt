@@ -1,4 +1,9 @@
 [JAPANESE]
-TITLE=動作ｾﾝｻｰPAL
-DESC=動作ｾﾝｻｰPAL(MOT)を稼働させ、連続的に加速度情報を無線送信します。
+TITLE=動作センサーPAL
+DESC=動作センサーPALに搭載された加速度センサから連続的に取得した値を送信するサンプルです。
+URL=https://mwx.twelite.info/act_samples/pal_mot
+[ENGLISH]
+TITLE=MOT PAL
+DESC=Act sample using an acceleration sensor on the MOT PAL.
+Get acceleration value continuously.
 URL=https://mwx.twelite.info/act_samples/pal_mot

@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=TimerによるLチカ制御
-DESC=act1ではdelayを使用して点滅時間を設定しましたが、act2はTimerを使用する例です。以下はact2フォルダにあるソースプログラムact2.cppです。
+TITLE=DIO割り込み
+DESC=DIOポートの割り込みを使用するサンプルです。
+URL=https://mono-wireless.com/jp/products/act/index.html
+[ENGLISH]
+TITLE=DIO Interrupts
+DESC=Act sample using DIO interrupts.
 URL=https://mono-wireless.com/jp/products/act/index.html

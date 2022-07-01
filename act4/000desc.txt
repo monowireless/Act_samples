@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=スイッチを押した時にLEDを点灯
-DESC=act4はTWELITE DIPに接続されたスイッチを押した時にLEDを点灯させるactを動作させます。
+TITLE=スイッチを押したときにLEDを点灯
+DESC=TWELITE DIPに接続したスイッチを押したときにLEDを点灯させるサンプルです。
+URL=https://mono-wireless.com/jp/products/act/index.html
+[ENGLISH]
+TITLE=Turn on a LED with the button
+DESC=Act sample that controls a LED with the button connected to the TWELITE DIP.
 URL=https://mono-wireless.com/jp/products/act/index.html

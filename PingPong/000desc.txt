@@ -1,4 +1,9 @@
 [JAPANESE]
 TITLE=ピンポン
-DESC=2つ以上のﾃﾞﾊﾞｲｽに本Actを書込みます。一方のﾃﾞﾊﾞｲｽから送信された無線ﾊﾟｹｯﾄを他方から返信します。
+DESC=相手から受信したパケットをそのまま相手に送信するサンプルです。
+複数のTWELITEにこのActを書き込みます。
+URL=https://mwx.twelite.info/act_samples/pingpong
+[ENGLISH]
+TITLE=PingPong
+DESC=Act sample that sends received packets as they are. Write this act to multiple devices.
 URL=https://mwx.twelite.info/act_samples/pingpong

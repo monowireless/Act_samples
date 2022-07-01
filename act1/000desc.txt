@@ -1,4 +1,8 @@
 [JAPANESE]
-TITLE=Lチカ（LED点滅）
-DESC=Actの手始めとして、Lチカ（LED点滅）させる例です。
+TITLE=Lチカ
+DESC=Actの手始めとして、LEDを点滅させるサンプルです。
+URL=https://mono-wireless.com/jp/products/act/index.html
+[ENGLISH]
+TITLE=Blinking a LED
+DESC=Act sample for blinking a LED
 URL=https://mono-wireless.com/jp/products/act/index.html
