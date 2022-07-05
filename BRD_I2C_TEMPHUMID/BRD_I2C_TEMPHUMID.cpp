@@ -194,7 +194,6 @@ void setup() {
 
 	/*** BEGIN section */
 	Wire.begin(); // start two wire serial bus.
-	Analogue.begin(pack_bits(PIN_ANALOGUE::A1, PIN_ANALOGUE::VCC)); // _start continuous adc capture.
 	
 	// let the TWELITE begin!
 	the_twelite.begin();
