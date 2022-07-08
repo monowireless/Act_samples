@@ -23,6 +23,7 @@ void setup() {
 	// initialize global objects
 	mwx::pnew(g_pkt_pal);
 	mwx::pnew(g_pkt_apptwelite);
+	mwx::pnew(g_pkt_actsamples);
 	mwx::pnew(g_pkt_unknown);
 
 	// initialize system behaviors
@@ -80,9 +81,10 @@ void loop() {
 
 	if (TickTimer.available()) {
 		static unsigned t;
-		if (!(++t & 0x3FF)) {
+		if (!(++t & 0x3FF)) { // every 1024ms
 			g_pkt_pal.refresh();
 			g_pkt_apptwelite.refresh();
+			g_pkt_actsamples.refresh();
 			g_pkt_unknown.refresh();
 		}
 	}
