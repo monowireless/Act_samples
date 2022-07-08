@@ -2,9 +2,9 @@
 TITLE=UART1 (Serial1)
 DESC=UART1を使用するサンプルです。
 UART0への入力はUART1へ出力し、UART1への入力はUART0へ出力します。
-URL=https://mwx.twelite.info/act_samples/unit_act
+URL=jp/MWX/content/act_samples/unit_acts.html
 [ENGLISH]
 TITLE=UART1 (Serial1)
 DESC=Act sample using UART1.
 Input to UART0 be output from UART1, and input to UART1 be output from UART0.
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=en/MWX/content/act_samples/unit_acts.html

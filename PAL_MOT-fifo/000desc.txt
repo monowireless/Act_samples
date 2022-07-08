@@ -1,9 +1,9 @@
 [JAPANESE]
 TITLE=動作センサーPAL
 DESC=動作センサーPALに搭載された加速度センサから連続的に取得した値を送信するサンプルです。
-URL=https://mwx.twelite.info/act_samples/pal_mot
+URL=jp/MWX/content/act_samples/pal_mot.html
 [ENGLISH]
 TITLE=MOT PAL
 DESC=Act sample using an acceleration sensor on the MOT PAL.
 Get acceleration value continuously.
-URL=https://mwx.twelite.info/act_samples/pal_mot
+URL=en/MWX/content/act_samples/pal_mot.html

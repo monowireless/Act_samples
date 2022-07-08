@@ -2,9 +2,9 @@
 TITLE=I2Cデバイス探索
 DESC=I2Cデバイス(1..127)の存在を確認するサンプルです。
 一部のデバイスからは応答がない場合があります。
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=jp/MWX/content/act_samples/unit_acts.html
 [ENGLISH]
 TITLE=Prove I2C devices
 DESC=Act sample for checking availability for I2C devices (1..127).
 Some devices may not respond.
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=en/MWX/content/act_samples/unit_acts.html

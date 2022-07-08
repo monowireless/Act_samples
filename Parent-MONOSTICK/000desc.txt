@@ -1,9 +1,9 @@
 [JAPANESE]
 TITLE=親機 — MONOSTICK用
 DESC=無線パケットを受信し、ASCII形式でUART出力するサンプルです。Act_samplesの多くに対応しています。
-URL=https://mwx.twelite.info/act_samples/parent_monostick
+URL=jp/MWX/content/act_samples/parent_monostick.html
 [ENGLISH]
 TITLE=Parent device (MONOSTICK)
 DESC=Act sample that prints received packets in ASCII strings.
 Compatible with most of Act_samples.
-URL=https://mwx.twelite.info/act_samples/parent_monostick
+URL=en/MWX/content/act_samples/parent_monostick.html

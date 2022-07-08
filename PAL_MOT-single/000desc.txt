@@ -2,9 +2,9 @@
 TITLE=動作センサーPAL — 周期実行版
 DESC=動作センサーPALに搭載された加速度センサから取得した値を送信するサンプルです。
 スリープによる周期実行を行い、起床毎に加速度値を送信します。
-URL=https://mwx.twelite.info/act_samples/pal_mot-oneshot
+URL=jp/MWX/content/act_samples/pal_mot-oneshot.html
 [ENGLISH]
 TITLE=MOT PAL — Periodical version
 DESC=Act sample using an acceleration sensor on the MOT PAL.
 Periodically sleeps, send acceleration values on wake-up.
-URL=https://mwx.twelite.info/act_samples/pal_mot-oneshot
+URL=en/MWX/content/act_samples/pal_mot-oneshot.html

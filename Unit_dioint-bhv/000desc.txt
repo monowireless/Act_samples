@@ -1,8 +1,8 @@
 [JAPANESE]
 TITLE=DIO割り込み
 DESC=DIOポートの割り込みを使用するサンプルです。
-URL=https://mono-wireless.com/jp/products/act/index.html
+URL=jp/MWX/content/act_samples/unit_acts.html
 [ENGLISH]
 TITLE=DIO Interrupts
 DESC=Act sample using DIO interrupts.
-URL=https://mono-wireless.com/jp/products/act/index.html
+URL=en/MWX/content/act_samples/unit_acts.html

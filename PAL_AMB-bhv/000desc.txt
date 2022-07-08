@@ -2,9 +2,9 @@
 TITLE=環境センサーPAL — ビヘイビア版
 DESC=環境センサーPALに搭載された2種のセンサ(SHTC/LTR308ALS)から取得した値を送信するサンプルです。
 より厳格なビヘイビアを使用し、親機と子機のソースコードを分離しています。
-URL=https://mwx.twelite.info/api-reference/behavior/pal_amb-behavior
+URL=jp/MWX/content/act_samples/pal_amb-behavior.html
 [ENGLISH]
 TITLE=AMB PAL — "Behavior" version
 DESC=Act sample using two sensors on the TWELITE AMB PAL (SHTC/LTR308ALS).
 Built with the strict "Behavior" system and split code files for the parent / children devices
-URL=https://mwx.twelite.info/act_samples/pal_amb
+URL=en/MWX/content/act_samples/pal_amb-behavior.html

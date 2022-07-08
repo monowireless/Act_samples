@@ -1,8 +1,8 @@
 [JAPANESE]
 TITLE=Lチカ
 DESC=Actの手始めとして、LEDを点滅させるサンプルです。
-URL=https://mono-wireless.com/jp/products/act/index.html
+URL=jp/MWX/content/act_samples/act_opening.html
 [ENGLISH]
 TITLE=Blinking a LED
 DESC=Act sample for blinking a LED
-URL=https://mono-wireless.com/jp/products/act/index.html
+URL=en/MWX/content/act_samples/act_opening.html

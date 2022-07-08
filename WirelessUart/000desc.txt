@@ -1,8 +1,8 @@
 [JAPANESE]
 TITLE=ワイヤレスUART通信
 DESC=親子間のUART通信を無線化し、ASCII形式の文字列を送受信するサンプルです。
-URL=https://mwx.twelite.info/act_samples/wirelessuart
+URL=jp/MWX/content/act_samples/wirelessuart.html
 [ENGLISH]
 TITLE=Wireless UART communication
 DESC=Act sample that makes UART communications by ASCII strings wireless.
-URL=https://mwx.twelite.info/act_samples/wirelessuart
+URL=en/MWX/content/act_samples/wirelessuart.html

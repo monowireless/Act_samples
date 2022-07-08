@@ -2,9 +2,9 @@
 TITLE=TWELITE CUE 磁石検知ブザー
 DESC=TWELITE CUEのホールセンサを使って、磁石が遠ざかったときに圧電ブザーを鳴らすサンプルです。
 圧電ブザーはVCCとSET間に接続します。
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=jp/MWX/content/act_samples/unit_acts.html
 [ENGLISH]
 TITLE=TWELITE CUE Magnet-detection buzzer
 DESC=Act sample that sounds a buzzer when the magnet is taken off.
 Connect a buzzer to the VCC pin and the GND pin.
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=en/MWX/content/act_samples/unit_acts.html

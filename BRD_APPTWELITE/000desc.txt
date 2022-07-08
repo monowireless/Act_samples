@@ -1,10 +1,10 @@
 [JAPANESE]
 TITLE=デジタル・アナログ信号転送
 DESC=標準アプリ(App_Twelite)の基本機能(DI1..4 -> DO1..4, AI1..4 -> PWM1..4)を実装したサンプルです。
-***標準アプリとパケットの互換性はありません***
-URL=https://mwx.twelite.info/act_samples/brd_apptwelite
+***標準アプリとパケットの互換性はありません！***
+URL=jp/MWX/content/act_samples/brd_apptwelite.html
 [ENGLISH]
 TITLE=Transmit digital/analog signals
 DESC=Act sample that behaves like App_Twelite: Mirror DI1..4 to DO1..4 and AI1..4 to PWM1..4
 ***INCOMPATIBLE with App_Twelite packets!***
-URL=https://mwx.twelite.info/act_samples/brd_apptwelite
+URL=en/MWX/content/act_samples/brd_apptwelite.html

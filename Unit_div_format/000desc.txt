@@ -2,9 +2,9 @@
 TITLE=div*()の結果出力
 DESC=div100()等の結果を書式文字列へ変換するサンプルです。
 div_result_i32で出力された値を書式文字列に変換します。
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=jp/MWX/content/act_samples/unit_acts.html
 [ENGLISH]
 TITLE=Print div*() results
 DESC=Act sample that prints results from the function such as div100().
 Convert from div_result_i32 to formatted strings.
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=en/MWX/content/act_samples/unit_acts.html

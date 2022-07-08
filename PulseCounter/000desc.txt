@@ -2,10 +2,10 @@
 TITLE=パルスカウンタ
 DESC=パルスカウントを行い、一定時間経過後または一定数のカウントを検出したら値を送信するサンプルです。
 スリープ中もカウントを行います。
-URL=https://mwx.twelite.info/act_samples/pulsecounter
+URL=jp/MWX/content/act_samples/pulsecounter.html
 [ENGLISH]
 TITLE=Pulse counter
 DESC=Act sample with a pulse couter.
 Send count value after a certain period of time was elapsed or certain number of counts were detected.
 The pulse counter works when the MCU is sleeping.
-URL=https://mwx.twelite.info/act_samples/pulsecounter
+URL=en/MWX/content/act_samples/pulsecounter.html

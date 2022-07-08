@@ -1,8 +1,9 @@
 [JAPANESE]
 TITLE=I2Cｾﾝｻｰｻﾝﾌﾟﾙｱｸﾄ
 DESC=I2Cｾﾝｻｰを使用するためのｻﾝﾌﾟﾙｱｸﾄです。例として温湿度ｾﾝｻｰ(SHTC3/SHT40)を使用しています。
-URL=https://mwx.twelite.info/act_samples/
+URL=jp/MWX/content/act_samples/brd_i2c_temphumid.html
 [ENGLISH]
 TITLE=I2C sample Act
-DESC=This is a sample Act for using an I2C sensor. Temperature/humidity sensors (SHTC3/SHT40) is used as an example.
-URL=https://mwx.twelite.info/act_samples/
+DESC=Act sample using an I2C sensor.
+Temperature / humidity sensors (SHTC3/SHT40) are used as an example.
+URL=en/MWX/content/act_samples/brd_i2c_temphumid.html

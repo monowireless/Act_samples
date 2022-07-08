@@ -2,9 +2,9 @@
 TITLE=TWELITE ARIAボードテスト
 DESC=TWELITE ARIAのセンサおよびLEDの動作確認を行います。
 それぞれをテストするには、[t] / [s] / [l] キーを入力してください。
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=jp/MWX/content/act_samples/unit_acts.html
 [ENGLISH]
 TITLE=Testing TWELITE ARIA boards
 DESC=Act sample for checking the ability for sensors and led.
 Press [t] / [s] / [l] to test each devices.
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=en/MWX/content/act_samples/unit_acts.html

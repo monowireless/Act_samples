@@ -1,8 +1,8 @@
 [JAPANESE]
 TITLE=delayMicroseconds()
 DESC=delayMicroseconds()を使ったカウント値とTickTimerのカウント値を比較して精度を確認するサンプルです。
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=jp/MWX/content/act_samples/unit_acts.html
 [ENGLISH]
 TITLE=delayMicroseconds()
 DESC=Act sample for checking accuracy for delayMicroseconds() and Timers.
-URL=https://mwx.twelite.info/act_samples/unit_acts
+URL=en/MWX/content/act_samples/unit_acts.html

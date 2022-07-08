@@ -1,8 +1,8 @@
 [JAPANESE]
 TITLE=インタラクティブモードによる設定
 DESC=インタラクティブモードによるパラメータ設定を行うサンプルです。
-URL=https://mwx.twelite.info/settings/stg_std
+URL=jp/MWX/content/act_samples/README.html
 [ENGLISH]
 TITLE=Settings with the interactive mode.
 DESC=Act sample with parameter settings for interactive mode.
-URL=https://mwx.twelite.info/settings/stg_std
+URL=en/MWX/content/act_samples/README.html
