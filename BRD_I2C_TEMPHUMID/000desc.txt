@@ -1,6 +1,6 @@
 [JAPANESE]
-TITLE=I2Cｾﾝｻｰｻﾝﾌﾟﾙｱｸﾄ
-DESC=I2Cｾﾝｻｰを使用するためのｻﾝﾌﾟﾙｱｸﾄです。例として温湿度ｾﾝｻｰ(SHTC3/SHT40)を使用しています。
+TITLE=I2Cセンサ サンプル
+DESC=I2Cセンサを使用するためのサンプルアクトです。例として温湿度センサ(SHTC3/SHT40)を使用しています。
 URL=jp/MWX/content/act_samples/brd_i2c_temphumid.html
 [ENGLISH]
 TITLE=I2C sample Act
