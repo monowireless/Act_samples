@@ -5,3 +5,4 @@
 objs*/
 builderr.log
 stage/
+*/build/_mwx_version.c
